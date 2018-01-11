@@ -5,16 +5,16 @@ from onegram import *
 import re
 def hasNumbers(inputString):
     return bool(re.search(r'\d', inputString))
-    def getStoplist():
-        s = {}
-        f = open("stopword.txt", 'r')
-        for line in f:
-            line = line.strip()
-            if line not in s:
-                s[line] = 0
-        f.close()
-        return s
-    stoplist = getStoplist()
+def getStoplist():
+    s = {}
+    f = open("stopword.txt", 'r')
+    for line in f:
+        line = line.strip()
+        if line not in s:
+            s[line] = 0
+    f.close()
+    return s
+stoplist = getStoplist()
 
 
 #本程序需要的文件：
