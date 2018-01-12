@@ -7,7 +7,7 @@ def hasNumbers(inputString):
     return bool(re.search(r'\d', inputString))
 def getStoplist():
     s = {}
-    f = open("stopword.txt", 'r')
+    f = open("../stopword.txt", 'r')
     for line in f:
         line = line.strip()
         if line not in s:
@@ -92,10 +92,10 @@ for NewsName in newsName:
 
     #打印出ngram，以供查看和打分
     # fn1 = 'ngram的特征和分数/'+NewsName+'/XY.txt'
-    f = open('./Processed/'+NewsName+'/ngrams.txt', 'w')
-    for g in allGram:
-        f.write(g.content+'\n')
-    f.close()
+    # f = open('./Processed/'+NewsName+'/ngrams.txt', 'w')
+    # for g in allGram:
+    #     f.write(g.content+'\n')
+    # f.close()
 
     #打印特征值
     # print 'get X..'

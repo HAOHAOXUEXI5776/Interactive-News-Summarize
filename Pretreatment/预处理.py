@@ -23,8 +23,8 @@ for news in NewsName:
     howmuch = os.listdir(unicode('../News/'+news,'utf8'))
     howmuch = len(howmuch) - 2 #该新闻有多少篇
     DIR = '../News/'+news+'/'
-    F1 = './Processed/'+news+'/words.txt'
-    F2 = './Processed/'+news+'/dict.txt'
+    F1 = '../Ngrams/Processed/'+news+'/words.txt'
+    F2 = '../Ngrams/Processed/'+news+'/dict.txt'
     dirpath = './Processed/'+news
     if os.path.exists(dirpath) == False:
         os.makedirs(unicode(dirpath, 'utf8'))
