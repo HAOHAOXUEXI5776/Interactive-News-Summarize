@@ -1,6 +1,6 @@
 # Interactive-News-Summarize
 News  
-\t所有原始新闻的文件夹  
+>所有原始新闻的文件夹 
 Pretreatment  
 \table预处理.py  
         处理原始新闻，得到每类新闻的词典dict.txt与分词表示.txt，放在Ngrams/Processed的对应文件夹下  
