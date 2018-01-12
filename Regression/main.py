@@ -91,6 +91,7 @@ for NewsName in newsName:
         g.getide()
 
     #打印出ngram，以供查看和打分
+    # fn1 = 'ngram的特征和分数/'+NewsName+'/XY.txt'
     f = open('./Processed/'+NewsName+'/ngrams.txt', 'w')
     for g in allGram:
         f.write(g.content+'\n')
