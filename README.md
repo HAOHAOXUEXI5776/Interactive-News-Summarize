@@ -1,5 +1,5 @@
 # Interactive-News-Summarize
-News
+News  
     所有原始新闻的文件夹
 Pretreatment
     预处理.py
