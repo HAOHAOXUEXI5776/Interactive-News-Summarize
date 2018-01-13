@@ -57,9 +57,9 @@ def main():
 
         #输出到feature/中
         for k in range(0, l):
-            tmp_ngram = ngram[k].split('+')
-            if len(tmp_ngram) == 3 and tmp_ngram[1] in punc:
-                continue
+            # tmp_ngram = ngram[k].split('+')
+            # if len(tmp_ngram) == 3 and tmp_ngram[1] in punc:
+            #     continue
             fw.write(ngram[k]+' '+score[k])
             for j in range(0, 7):
                 fw.write(' '+str(features[k][j]))

@@ -137,7 +137,7 @@ def Build1Gram(NewsName, NewsNum, dics2i, dici2s, dicL,stoplist):
             widl.append(wid)
         for j in range(0, titlelen):
             wid = widl[j]
-            oneGram[wid].update(1, i-1)
+            oneGram[wid].update(1, i)
             #添加上下文
             k = j - 1
             while k >= 0 and k >= j-windows:
@@ -156,7 +156,7 @@ def Build1Gram(NewsName, NewsNum, dics2i, dici2s, dicL,stoplist):
             widl.append(wid)
         for j in range(0, bodylen):
             wid = widl[j]
-            oneGram[wid].update(0, i-1)
+            oneGram[wid].update(0, i)
             #添加上下文
             k = j - 1
             while k >= 0 and k >= j-windows:
@@ -208,7 +208,7 @@ def BuildnGram(n, NewsName, NewsNum,stoplist):
                     biGramDic[tmp] = biCnt
                     biCnt += 1
                 curid = biGramDic[tmp]
-                biGram[curid].update(1, i-1)
+                biGram[curid].update(1, i)
                 k = j - 1
                 while k >= 0 and k >= j-windows:
                     biGram[curid].lcontent.append(title[k])
@@ -239,7 +239,7 @@ def BuildnGram(n, NewsName, NewsNum,stoplist):
                         biGramDic[tmp] = biCnt
                         biCnt+=1
                     curid = biGramDic[tmp]
-                    biGram[curid].update(0,i-1)
+                    biGram[curid].update(0,i)
 
                     k = j - 1
                     while k >= 0 and k >= j-windows:

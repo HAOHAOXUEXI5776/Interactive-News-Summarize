@@ -22,9 +22,10 @@ class ANew():
     def SetOneGram(self, OneGramId, dics2i):
         self.OneGramLen = len(OneGramId)
         self.OneGram = [0 for i in range(0, self.OneGramLen)]
-        allword = copy.deepcopy(self.title)
-        allword.extend(self.body)
-        for word in allword:
+        # allword = copy.deepcopy(self.title)
+        # allword.extend(self.body)
+        # for word in allword:
+        for word in self.body:
             wid = dics2i[word]
             for i in range(0, self.OneGramLen):
                 if wid == OneGramId[i]:
@@ -45,7 +46,7 @@ def BuildNews(NewsName, NewsNum):
     New = []
     fn = './Processed/'+NewsName+'/words.txt'
     f = open(fn, 'r')
-    for i in range(1, NewsNum):
+    for i in range(0, NewsNum):
         a = ANew()
         title = f.readline()
         body = f.readline()
