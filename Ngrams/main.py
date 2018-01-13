@@ -90,18 +90,12 @@ for NewsName in newsName:
         g.getics(New, OneGramLen)
         g.getide()
 
-    #打印出ngram，以供查看和打分
-    # fn1 = 'ngram的特征和分数/'+NewsName+'/XY.txt'
-    # f = open('./Processed/'+NewsName+'/ngrams.txt', 'w')
-    # for g in allGram:
-    #     f.write(g.content+'\n')
-    # f.close()
 
-    #打印特征值
-    # print 'get X..'
-    # f = open('./Processed/'+NewsName+'/X.txt', 'w')
-    # for g in allGram:
-    #     f.write(g.content+' ')
-    #     f.write(str(g.inTitle)+' '+str(g.ce)+' '+str(g.ide)+' '+str(g.ics)+' '+str(g.len)+' '+str(g.tfidf))
-    #     f.write('\n')
-    # f.close()
+    # 打印特征值
+    print 'get X..'
+    f = open('./Processed/feature/'+NewsName+'.txt', 'w')
+    for g in allGram:
+        f.write(g.content+' ')
+        f.write(str(g.tfidf)+' '+str(g.len)+' '+str(g.ics)+' '+str(g.ce)+' '+str(g.ide)+' '+str(g.inTitle)+' '+str(g.n))
+        f.write('\n')
+    f.close()
