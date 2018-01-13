@@ -234,6 +234,7 @@ def BuildnGram(n, NewsName, NewsNum,stoplist):
                     if tmp not in biGramDic:
                         a = ANgram(n)
                         a.content = tmp
+                        a.len = len(tmp)
                         biGram.append(a)
                         biGramDic[tmp] = biCnt
                         biCnt+=1
