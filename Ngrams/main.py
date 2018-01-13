@@ -73,7 +73,7 @@ for NewsName in newsName:
     #计算ce、ics需要用到oneGram、OneGramId
     print 'get tfidf and ce..'
     for g in allGram:
-        g.gettfidf(NewsNum)
+        g.gettfidf(NewsNum+1)
         g.getce(oneGram, OneGramId)
 
     #利用1-gram得到每篇新闻的向量表示

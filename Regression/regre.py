@@ -33,11 +33,11 @@ def diff(tY, Y):
     l = len(Y)
     id30, id20, id10 = [], [], []
     for i in range(0, l):
-        if int(Y[i]) == 30:
+        if int(Y[i]) == 3:
             id30.append(i)
-        elif int(Y[i]) == 20:
+        elif int(Y[i]) == 2:
             id20.append(i)
-        elif int(Y[i]) == 10:
+        elif int(Y[i]) == 1:
             id10.append(i)
     n3, n2, n1 = len(id30), len(id20), len(id10)
     # print 'n1,n2,n3',n1,n2,n3
@@ -68,7 +68,7 @@ newsName = ['hpv疫苗','iPhone X', '乌镇互联网大会','九寨沟7.0级地�
 #得到十个分数，将10个分数平均得到该次迭代的分数。最后再对iter进行平均，作为
 #该模型的得分。得分越高，说明越准确。
 def tenfcv(regfun, alpha = 0.5, C = 1):
-    iters = 20
+    iters = 2
     featureDir = '../Ngrams/feature/' #特征所在的目录
     score = 0.0
     for ite in range(0, iters):
