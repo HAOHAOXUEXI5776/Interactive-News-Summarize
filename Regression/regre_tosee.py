@@ -84,9 +84,10 @@ def diff(tY, Y):
     return score, index[0:topn]
 
 
-newsName = ['hpv疫苗','iPhone X', '乌镇互联网大会','九寨沟7.0级地震','俄罗斯世界杯',\
-'双十一购物节', '德国大选', '功守道', '战狼2', '权力的游戏']
-
+newsName = ['hpv疫苗','iPhone X', '乌镇互联网大会','九寨沟7.0级地震','俄罗斯世界杯',
+'双十一购物节', '德国大选', '功守道', '战狼2', '权力的游戏', '李晨求婚范冰冰', '江歌刘鑫',
+'王宝强马蓉离婚案', '百度无人驾驶汽车', '红黄蓝幼儿园', '绝地求生 吃鸡', '英国脱欧',
+'萨德系统 中韩', '雄安新区', '榆林产妇坠楼']
 #采用十折交叉验证，迭代iters次，每次迭代，轮流将9个作为训练集，1个作为测试集
 #得到十个分数，将10个分数平均得到该次迭代的分数。最后再对iter进行平均，作为
 #该模型的得分。得分越高，说明越准确。
@@ -97,7 +98,8 @@ def tenfcv(regfun, feature = 'feature', ratio = 0.5, alpha = 0.5, kernel = 'rbf'
     # 计算标注的ngram和未标注的ngram的个数
     label = 0.0
     unlabel = 0.0
-    for i in range(0, 10):
+    endNews = 20
+    for i in range(0, endNews):
         NewsName = unicode(featureDir + newsName[i] + '.txt', 'utf8')
         f = open(NewsName, 'r')
         for line in f:
@@ -112,10 +114,10 @@ def tenfcv(regfun, feature = 'feature', ratio = 0.5, alpha = 0.5, kernel = 'rbf'
         gate = label / (ratio * unlabel)
 
     scorei = 0.0
-    for vid in range(0, 10):
+    for vid in range(0, endNews):
         #0~9中的第vid个作为验证集，其余的作为训练集
         X, Y = [], []
-        for k in range(0, 10):
+        for k in range(0, endNews):
             if k != vid:
                 #每行的结构为：ngram的内容+人工标注的分数+7个特征
                 NewsName = unicode(featureDir+newsName[k]+'.txt','utf8')
@@ -174,7 +176,7 @@ def tenfcv(regfun, feature = 'feature', ratio = 0.5, alpha = 0.5, kernel = 'rbf'
             curid = topnid[i]
             f.write(content[curid]+' '+str(pY[curid])+' '+str(vY[curid])+'\n')
         f.close()
-    return scorei/10.0
+    return scorei/float(endNews)
 
 def main():
 

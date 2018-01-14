@@ -73,10 +73,10 @@ def tenfcv(regfun, alpha = 0.5, C = 1):
     score = 0.0
     for ite in range(0, iters):
         scorei = 0.0
-        for vid in range(0, 10):
+        for vid in range(0, 20):
             #0~9中的第vid个作为验证集，其余的作为训练集
             X, Y = [], []
-            for k in range(0, 10):
+            for k in range(0, 20):
                 if k != vid:
                     #每行的结构为：ngram的内容+人工标注的分数+7个特征
                     NewsName = unicode(featureDir+newsName[k]+'.txt','utf8')
@@ -113,7 +113,7 @@ def tenfcv(regfun, alpha = 0.5, C = 1):
             tmpscore = diff(pY, vY)
             scorei +=  tmpscore
 
-        score += scorei/10.0
+        score += scorei/20.0
 
     score /= float(iters)
     return score

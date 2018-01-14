@@ -97,7 +97,8 @@ def tenfcv(regfun, feature = 'feature', ratio = 0.5, alpha = 0.5, kernel = 'rbf'
     # 计算标注的ngram和未标注的ngram的个数
     label = 0.0
     unlabel = 0.0
-    for i in range(0,10):
+    endNews = 20 #指定第0~ednNews-1篇新闻
+    for i in range(0,endNews):
         NewsName = unicode(featureDir + newsName[i] + '.txt', 'utf8')
         f = open(NewsName, 'r')
         for line in f:
@@ -116,10 +117,10 @@ def tenfcv(regfun, feature = 'feature', ratio = 0.5, alpha = 0.5, kernel = 'rbf'
     for ite in range(0, iters):
         scorei = 0.0
         numberi = 0.0
-        for vid in range(0, 10):
+        for vid in range(0, endNews):
             #0~9中的第vid个作为验证集，其余的作为训练集
             X, Y = [], []
-            for k in range(0, 10):
+            for k in range(0, endNews):
                 if k != vid:
                     #每行的结构为：ngram的内容+人工标注的分数+7个特征
                     NewsName = unicode(featureDir+newsName[k]+'.txt','utf8')
@@ -165,8 +166,8 @@ def tenfcv(regfun, feature = 'feature', ratio = 0.5, alpha = 0.5, kernel = 'rbf'
             scorei +=  tmpscore
             numberi += tmpnumber
 
-        score += scorei/10.0
-        number += numberi/10.0
+        score += scorei/float(endNews)
+        number += numberi/float(endNews)
 
     score /= float(iters)
     number /= float(iters)
