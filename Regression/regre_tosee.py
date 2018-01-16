@@ -118,7 +118,7 @@ def tenfcv(regfun, feature = 'feature', ratio = 0.5, alpha = 0.5, kernel = 'rbf'
     # 计算标注的ngram和未标注的ngram的个数
     label = 0.0
     unlabel = 0.0
-    featureSize = 7
+    featureSize = 9
     for i in range(0, 20):
         NewsName = unicode(featureDir + newsName[i] + '.txt', 'utf8')
         f = open(NewsName, 'r')
@@ -151,7 +151,7 @@ def tenfcv(regfun, feature = 'feature', ratio = 0.5, alpha = 0.5, kernel = 'rbf'
                         if line[1] < 0.5 and random.random() > gate:
                             continue
                         # del line[5]
-                        del line[5]
+                        # del line[5]
                         X.append(line[2:9])
                         Y.append(line[1])
                     f.close()
@@ -168,7 +168,7 @@ def tenfcv(regfun, feature = 'feature', ratio = 0.5, alpha = 0.5, kernel = 'rbf'
 
                 # if line[1] < 0.5 and random.random() > gate:
                 #     continue
-                del line[5]
+                # del line[5]
                 # del line[5]
                 vX.append(line[2:9])
                 vY.append(line[1])
@@ -218,7 +218,7 @@ def tenfcv(regfun, feature = 'feature', ratio = 0.5, alpha = 0.5, kernel = 'rbf'
 
 def main():
 
-    feature = ['feature']
+    feature = ['feature_2']
     ratio = [0, 0.2, 0.4, 0.4, 0.8]
     alpha = [0.2*i for i in range(0,5)]
     kernel = ['rbf','poly']
@@ -234,7 +234,7 @@ def main():
     print 'linear_regression：', score, round(P_5, 3), round(P_10, 3), round(P_20, 3)
 
     # svr回归
-    score, P_5, P_10, P_20 = tenfcv(svr, feature=feature[0], ratio=ratio[3],kernel = kernel[1], C = C[3], gamma = 0.5)
+    score, P_5, P_10, P_20 = tenfcv(svr, feature=feature[0], ratio=ratio[3],kernel = kernel[1], C = C[3], gamma = 'auto')
     print 'svr：', score, round(P_5, 3), round(P_10, 3), round(P_20, 3)
 
     # # knn回归
@@ -242,7 +242,7 @@ def main():
     # print 'knn回归：', score, round(P_5, 3), round(P_10, 3), round(P_20, 3)
 
     #随机森林回归
-    score, P_5, P_10, P_20 = tenfcv(randomForestRegre, feature=feature[0], ratio=ratio[3], N=N[2],criterion=criterion[1])
+    score, P_5, P_10, P_20 = tenfcv(randomForestRegre, feature=feature[0], ratio=ratio[3], N=N[2],criterion=criterion[0])
     print 'random_forest回归：', score, round(P_5, 3), round(P_10, 3), round(P_20, 3)
 
 if __name__== "__main__":

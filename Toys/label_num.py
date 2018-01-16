@@ -6,7 +6,7 @@ newsName = ['德国大选', '俄罗斯世界杯', '功守道', '九寨沟7.0级�
             '李晨求婚范冰冰', '江歌刘鑫','王宝强马蓉离婚案', '百度无人驾驶汽车', '红黄蓝幼儿园',
             '绝地求生 吃鸡', '英国脱欧','萨德系统 中韩', '雄安新区', '榆林产妇坠楼']
 
-rootdir = '../Ngrams/feature2/'
+rootdir = '../Ngrams/feature/'
 
 print "liu's label"
 for n in range(0,10):
