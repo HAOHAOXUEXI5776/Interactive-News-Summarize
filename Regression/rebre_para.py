@@ -152,7 +152,7 @@ def tenfcv(regfun, feature = 'feature', cho = [1], ratio = 0.5, alpha = 0.5, ker
                         #去除特征3,4,10维，对应下标4,5,11
                         tmpx = []
                         for xi in range(0, featureSize):
-                            if (xi+1) in cho:
+                            if xi in cho:
                                 tmpx.append(line[xi+2])
                         X.append(tmpx)
                         Y.append(line[1])
@@ -170,7 +170,7 @@ def tenfcv(regfun, feature = 'feature', cho = [1], ratio = 0.5, alpha = 0.5, ker
                 #去除特征3,4,10维，对应下标4,5,11
                 tmpx = []
                 for xi in range(0, featureSize):
-                    if (xi+1) in cho:
+                    if xi in cho:
                         tmpx.append(line[xi+2])
                 vX.append(tmpx)
                 vY.append(line[1])
@@ -208,49 +208,20 @@ def tenfcv(regfun, feature = 'feature', cho = [1], ratio = 0.5, alpha = 0.5, ker
     return score, P_5, P_10, P_20
 
 def main():
-    # 注：不去掉onegram，iters = 1， 最优的情况为：
-    # 线性回归：    最优参数：feature: feature  ratio: 0.2
-    #               最优结果：score: 18.7  P@5: 0.43  P@10: 0.415  P@20: 0.3875
-    # 岭回归：      最优参数：feature: feature  ratio: 0.2  alpha: 0.4
-    #               最优结果：score: 18.6  P@5: 0.43  P@10: 0.42  P@20: 0.3875
-    # svr：         最优参数：feature: feature  ratio: 0.4  kernel: rbf  C: 16 gamma: auto
-    #               最优结果：score: 23.2  P@5: 0.47  P@10: 0.485  P@20: 0.49
-    # 决策树：      最优参数：feature: feature  ratio: 0.2  criterion: friedman_mse
-    #               最优结果：score: 13.54  P@5: 0.286  P@10: 0.3005  P@20: 0.3105
-    # knn：         最优参数：feature: feature  ratio: 0.6  K: 6  weights: uniform
-    #               最优结果：score: 18.25  P@5: 0.4  P@10: 0.4  P@20: 0.4
-    # 随机森林：    最优参数：feature: feature  ratio: 0.6  N: 30  criterion: friedman_mse
-    #               最优结果：score: 21.55  P@5: 0.59  P@10: 0.55  P@20: 0.48
-    # 删除ce特征，最优化情况为：
-    # svr:最优参数：feature: feature  ratio: 0.8  kernel: rbf  C: 16 gamma: auto
-    #     最优结果：score: 24.25  P@5: 0.48  P@10: 0.495  P@20: 0.5025
-    # knn:最优参数：feature: feature  ratio: 0  K: 4  weights: uniform
-    #     最优结果：score: 17.55  P@5: 0.44  P@10: 0.44  P@20: 0.3975
-    # 随机森林：最优参数：feature: feature  ratio: 0.2  N: 30  criterion: friedman_mse
-    # 最优结果：score: 21.25  P@5: 0.55  P@10: 0.55  P@20: 0.4675
 
-
-    # feature = ['feature_add2d']
-    feature = ['feature_12', 'feature_12cut']
-    choose = [[1,2,3,4,5,6,7],
-              [1,2,3,4,5,6,7,8,9],
-              [1,2,3,4,5,6,7,11,12],
-              [1,2,3,4,5,6,7,8,9,11,12]]
-    # ratio = [0, 0.2, 0.4, 0.6, 0.8]
-    ratio = [0.3, 0.4, 0.5]
-    alpha = [0.2*i for i in range(0,5)]
-    kernel = ['rbf','poly']
+    feature = ['feature_12cut']#'feature_12',
+    choose = [[0,1,2,3,4,5,6,7,8,9,10,11]]
+    ratio = [0, 0.2, 0.4, 0.6, 0.8]
+    kernel = ['rbf']#,'poly'
     C = [1,2,4,6,8]
-    gama = ['auto']
-    # criterion = ['mse','friedman_mse']
+    gama = [0.5, 1.0]
     criterion = ['mse']
-    K = [3,4,5,6,7]
-    weights = ['uniform','distance']
     N = [20,25,30,35,40]
-    '''
+
     f1, r1, a1, k1, c1, g1, cr1, k1, w1, n1 = 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     score, P_5, P_10, P_20 = 0.0, 0.0, 0.0, 0.0
 
+    '''
     print '线性回归调参'
     # 最优参数：
     # 最优结果：
@@ -267,30 +238,6 @@ def main():
                 r1 = r
     print '最优参数：feature:',feature[f1],' ratio:',ratio[r1]
     print '最优结果：score:',score,' P@5:',P_5,' P@10:',P_10,' P@20:', P_20
-
-    f1, r1, a1, k1, c1, g1, cr1, k1, w1, n1 = 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-    score, P_5, P_10, P_20 = 0.0, 0.0, 0.0, 0.0
-
-    print '岭回归调参'
-    # 最优参数：
-    # 最优结果：
-    for f in range(0, len(feature)):
-        for r in range(0, len(ratio)):
-            for a in range(0, len(alpha)):
-                curScore, cur5, cur10, cur20 = tenfcv(ridgeRegre, feature=feature[f], ratio=ratio[r],
-                                             alpha = alpha[a], iters = 1)
-                print 'feature:', feature[f], '\tratio:', ratio[r],'\talpha:', alpha[a], \
-                    '\tscore:', curScore,'\tP@20:',cur20
-                if cur5 > P_5 or (cur5 == P_5 and cur10 > P_10) or (cur5 == P_5 and cur10 == P_10 and cur20 > P_20):
-                    score = curScore
-                    P_5 = cur5
-                    P_10 = cur10
-                    P_20 = cur20
-                    f1 = f
-                    r1 = r
-                    a1 = a
-    print '最优参数：feature:', feature[f1], ' ratio:', ratio[r1], ' alpha:',alpha[a1]
-    print '最优结果：score:', score,' P@5:',P_5,' P@10:',P_10,' P@20:', P_20
     '''
 
     f1, r1, a1, k1, c1, g1, cr1, k1, w1, n1, ch1 = 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
@@ -323,56 +270,6 @@ def main():
     print '最优参数：feature:', feature[f1], 'choose:', ch1, ' ratio:', ratio[r1], ' kernel:', kernel[k1], ' C:', C[c1], 'gamma:', gama[g1]
     print '最优结果：score:', score,' P@5:',P_5,' P@10:',P_10,' P@20:', P_20
 
-    '''
-    f1, r1, a1, k1, c1, g1, cr1, k1, w1, n1 = 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-    score, P_5, P_10, P_20 = 0.0, 0.0, 0.0, 0.0
-
-    print '决策树调参'
-    # 最优参数：
-    # 最优结果：
-    for f in range(0, len(feature)):
-        for r in range(0, len(ratio)):
-            for cr in range(0, len(criterion)):
-                curScore, cur5, cur10, cur20 = tenfcv(decisionTree, feature=feature[f], ratio=ratio[r], criterion = criterion[cr], iters = 10)
-                print 'feature:', feature[f], '\tratio:', ratio[r], '\tcriterion:', criterion[cr], \
-                    '\tscore:', curScore,'\tP@20:',cur20
-                if cur5 > P_5 or (cur5 == P_5 and cur10 > P_10) or (cur5 == P_5 and cur10 == P_10 and cur20 > P_20):
-                    score = curScore
-                    P_5 = cur5
-                    P_10 = cur10
-                    P_20 = cur20
-                    f1 = f
-                    r1 = r
-                    cr1 = cr
-    print '最优参数：feature:', feature[f1], ' ratio:', ratio[r1], ' criterion:', criterion[cr1]
-    print '最优结果：score:', score,' P@5:',P_5,' P@10:',P_10,' P@20:', P_20
-    '''
-    '''
-    f1, r1, a1, k1, c1, g1, cr1, k1, w1, n1 = 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-    score, P_5, P_10, P_20 = 0.0, 0.0, 0.0, 0.0
-
-    print 'knn调参'
-    # 最优参数：
-    # 最优结果：
-    for f in range(0, len(feature)):
-        for r in range(0, len(ratio)):
-            for k in range(0, len(K)):
-                for w in range(0, len(weights)):
-                    curScore, cur5, cur10, cur20 = tenfcv(knnRegre, feature=feature[f], ratio=ratio[r], K = K[k], weights = weights[w])
-                    print 'feature:', feature[f], '\tratio:', ratio[r], '\tK:', K[k], '\tweights:', weights[w], \
-                        '\tscore:', curScore,'\tP@20:',cur20
-                    if cur5 > P_5 or (cur5 == P_5 and cur10 > P_10) or (cur5 == P_5 and cur10 == P_10 and cur20 > P_20):
-                        score = curScore
-                        P_5 = cur5
-                        P_10 = cur10
-                        P_20 = cur20
-                        f1 = f
-                        r1 = r
-                        k1 = k
-                        w1 = w
-    print '最优参数：feature:', feature[f1], ' ratio:', ratio[r1], ' K:', K[k1], ' weights:', weights[w1]
-    print '最优结果：score:', score,' P@5:',P_5,' P@10:',P_10,' P@20:', P_20
-    '''
 
     f1, r1, a1, k1, c1, g1, cr1, k1, w1, n1, ch1 = 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     score, P_5, P_10, P_20 = 0.0, 0.0, 0.0, 0.0
