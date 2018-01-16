@@ -60,6 +60,8 @@ def main():
             tmp_ngram = ngram[k].split('+')
             if len(tmp_ngram) == 3 and tmp_ngram[1] in punc:
                 continue
+            if tmp_ngram[0] == '★':
+                continue
             fw.write(ngram[k]+' '+score[k])
             for j in range(0, 7):
                 fw.write(' '+str(features[k][j]))
