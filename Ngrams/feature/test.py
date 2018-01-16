@@ -10,22 +10,44 @@ news = ['hpv疫苗','iPhone X', '乌镇互联网大会','九寨沟7.0级地震',
 '萨德系统 中韩', '雄安新区', '榆林产妇坠楼']
 X, Y= [], []
 for newsName in news:
-    featureDir = ""
+    featureSize = 12
+    featureDir = "../feature_add2d/"
     f = open(unicode(featureDir+newsName+'.txt','utf8'),'r')
     for line in f:
         line = line.strip().split()
-        for i in range(1, 9):
+        for i in range(1, featureSize+2):
             line[i] = float(line[i])
-        X.append(line[2:9])
+        X.append(line[2:])
         Y.append(line[1])
     f.close()
 
 X = array(X)
 Y = array(Y)
 
-X1 = SelectKBest(chi2, k=6).fit_transform(X, Y)
-X2 = SelectKBest(lambda X, Y: list(array([pearsonr(x, Y) for x in X.T]).T), k=6).fit_transform(X, Y)
-for i in range(0, 5):
-    print X[i]
-    print X1[i]
-    print X2[i]
+ok = 8
+X1 = SelectKBest(chi2, k=ok).fit_transform(X, Y)
+X2 = SelectKBest(lambda X, Y: list(array([pearsonr(x, Y) for x in X.T]).T), k=ok).fit_transform(X, Y)
+
+print X[0]
+print X1[0]
+print X2[0]
+
+i = 0
+j = 0
+while i < 12:
+    if X[0][i] == X1[0][j]:
+        j += 1
+        i += 1
+    else:
+        print i+1
+        i += 1
+
+i = 0
+j = 0
+while i < 12:
+    if X[0][i] == X2[0][j]:
+        j += 1
+        i += 1
+    else:
+        print i+1
+        i += 1

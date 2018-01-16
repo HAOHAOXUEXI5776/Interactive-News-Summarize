@@ -111,14 +111,14 @@ newsName = ['hpv疫苗','iPhone X', '乌镇互联网大会','九寨沟7.0级地�
 #采用十折交叉验证，迭代iters次，每次迭代，轮流将9个作为训练集，1个作为测试集
 #得到十个分数，将10个分数平均得到该次迭代的分数。最后再对iter进行平均，作为
 #该模型的得分。得分越高，说明越准确。
-def tenfcv(regfun, feature = 'feature', ratio = 0.5, alpha = 0.5, kernel = 'rbf', C = 1, gamma = 'auto',
-           criterion = 'mse', K = 5, weights = 'uniform', N = 10, iters = 5):
+def tenfcv(regfun, feature = 'feature', cho = [1], ratio = 0.5, alpha = 0.5, kernel = 'rbf', C = 1, gamma = 'auto',
+           criterion = 'mse', K = 5, weights = 'uniform', N = 10, iters = 1):
     featureDir = '../Ngrams/' + feature + '/' #特征所在的目录
 
     # 计算标注的ngram和未标注的ngram的个数
     label = 0.0
     unlabel = 0.0
-    featureSize = 7
+    featureSize = 12
     for i in range(0, 20):
         NewsName = unicode(featureDir + newsName[i] + '.txt', 'utf8')
         f = open(NewsName, 'r')
@@ -151,8 +151,13 @@ def tenfcv(regfun, feature = 'feature', ratio = 0.5, alpha = 0.5, kernel = 'rbf'
                         if line[1] < 0.5 and random.random() > gate:
                             continue
                         # del line[5]
-                        del line[5]
-                        X.append(line[2:9])
+                        # del line[5]
+                        tmpx = []
+                        for xi in range(0, featureSize):
+                            if (xi+1) in cho:
+                            # if xi != 10 and xi != 11:
+                                tmpx.append(line[xi+2])
+                        X.append(tmpx)
                         Y.append(line[1])
                     f.close()
 
@@ -168,9 +173,13 @@ def tenfcv(regfun, feature = 'feature', ratio = 0.5, alpha = 0.5, kernel = 'rbf'
 
                 # if line[1] < 0.5 and random.random() > gate:
                 #     continue
-                del line[5]
                 # del line[5]
-                vX.append(line[2:9])
+                # del line[5]
+                tmpx = []
+                for xi in range(0, featureSize):
+                    if (xi+1) in cho:
+                        tmpx.append(line[xi+2])
+                vX.append(tmpx)
                 vY.append(line[1])
                 content.append(line[0])
             f.close()
@@ -201,12 +210,12 @@ def tenfcv(regfun, feature = 'feature', ratio = 0.5, alpha = 0.5, kernel = 'rbf'
             Pi_5 += p_5
             Pi_10 += p_10
             Pi_20 += p_20
-            # f = open(unicode(outname, 'utf8'), 'w')
-            # topn = 20
-            # for i in range(0, topn):
-            #     curid = topnid[i]
-            #     f.write(content[curid]+' '+str(pY[curid])+' '+str(vY[curid])+'\n')
-            # f.close()
+            f = open(unicode(outname, 'utf8'), 'w')
+            topn = 20
+            for i in range(0, topn):
+                curid = topnid[i]
+                f.write(content[curid]+' '+str(pY[curid])+' '+str(vY[curid])+'\n')
+            f.close()
 
 
         score += scorei/20.0
@@ -218,7 +227,7 @@ def tenfcv(regfun, feature = 'feature', ratio = 0.5, alpha = 0.5, kernel = 'rbf'
 
 def main():
 
-    feature = ['feature']
+    feature = ['feature_12cut']#, 'feature_12']
     ratio = [0, 0.2, 0.4, 0.4, 0.8]
     alpha = [0.2*i for i in range(0,5)]
     kernel = ['rbf','poly']
@@ -228,22 +237,29 @@ def main():
     K = [3,4,5,6,7]
     weights = ['uniform','distance']
     N = [10,20,30]
+    # choose = [[1,2,3,4,5,6,7,8,9,10],
+    #           [1,2,3,4,5,6,7,11,12],
+    #           [1,2,3,4,5,6,7,8,9,10,11,12]]
+    choose = [[1,2,3,4,5,6,7,8,9,10,11,12]]
+    for fe in feature:
+        print fe
+        for ch in choose:
+            print 'ch:=', ch
+            # 线性回归
+            score, P_5, P_10, P_20 = tenfcv(linearRegre, feature = fe,cho = ch, ratio = ratio[0])
+            print 'linear_regression：', score, round(P_5, 3), round(P_10, 3), round(P_20, 3)
 
-    # 线性回归
-    score, P_5, P_10, P_20 = tenfcv(linearRegre, feature = feature[0], ratio = ratio[0])
-    print 'linear_regression：', score, round(P_5, 3), round(P_10, 3), round(P_20, 3)
+            # svr回归
+            score, P_5, P_10, P_20 = tenfcv(svr, feature=fe, cho = ch, ratio=0.8,kernel = 'rbf', C = 1, gamma = 1.0)
+            print 'svr：', score, round(P_5, 3), round(P_10, 3), round(P_20, 3)
 
-    # svr回归
-    score, P_5, P_10, P_20 = tenfcv(svr, feature=feature[0], ratio=ratio[3],kernel = kernel[1], C = C[3], gamma = 0.5)
-    print 'svr：', score, round(P_5, 3), round(P_10, 3), round(P_20, 3)
+            # # knn回归
+            # score, P_5, P_10, P_20 = tenfcv(knnRegre, feature=feature[0], ratio=ratio[3], K = K[4], weights = weights[1])
+            # print 'knn回归：', score, round(P_5, 3), round(P_10, 3), round(P_20, 3)
 
-    # # knn回归
-    # score, P_5, P_10, P_20 = tenfcv(knnRegre, feature=feature[0], ratio=ratio[3], K = K[4], weights = weights[1])
-    # print 'knn回归：', score, round(P_5, 3), round(P_10, 3), round(P_20, 3)
-
-    #随机森林回归
-    score, P_5, P_10, P_20 = tenfcv(randomForestRegre, feature=feature[0], ratio=ratio[3], N=N[2],criterion=criterion[1])
-    print 'random_forest回归：', score, round(P_5, 3), round(P_10, 3), round(P_20, 3)
+            #随机森林回归
+            score, P_5, P_10, P_20 = tenfcv(randomForestRegre, feature=fe, cho = ch, ratio=0.4, N=40,criterion='mse')
+            print 'random_forest回归：', score, round(P_5, 3), round(P_10, 3), round(P_20, 3)
 
 if __name__== "__main__":
     main()

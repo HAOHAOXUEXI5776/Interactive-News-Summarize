@@ -5,8 +5,9 @@
 # ../ForBetter/tag/记录了大部分ngram的词性
 # 利用这两个文件还砍掉了部分ngram
 
-labelDir = 'feature/'
-outDir = 'feature5/'
+
+labelDir = 'feature_lda/'
+outDir = 'feature_12cut/'
 tagDir = '../ForBetter/tag/'
 contDir = '../ForBetter/continuity/'
 news = ['hpv疫苗','iPhone X', '乌镇互联网大会','九寨沟7.0级地震','俄罗斯世界杯',\
@@ -52,10 +53,10 @@ for newsName in news:
 
         if gram in newsName:
             continue
-        if 'nt' in curtag or 'm' in curtag or 'd' in curtag:
-            continue
-        # if 'nt' in curtag or 'd' in curtag:
+        # if 'nt' in curtag or 'm' in curtag or 'd' in curtag:
         #     continue
+        if 'nt' in curtag or 'd' in curtag:
+            continue
         if len(tline[0].split('+')) == 1 and tline[0] in alltag and ('n' not in alltag[tline[0]] or alltag[tline[0]] != 'v'):
             continue
         if gram in dic:
