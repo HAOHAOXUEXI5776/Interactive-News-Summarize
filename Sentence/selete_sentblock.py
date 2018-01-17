@@ -1,4 +1,5 @@
 # coding:utf-8
+import os
 
 # 根据一个标签，找到包含它的句子，如果该句子所在的段包含的句子数不多于3，则该段作为一个块，
 # 如果段包含3以上的句子，则将该句子的上下两句合共3句作为一个块。
@@ -6,6 +7,7 @@
 
 labelDir = './label/'
 sentDir = './sentence/'
+outDir = './sentence/assign/'
 
 class Sent:
     def __init__(self, _newsid, _globalid, _paraid, _localid, _sentnum, _content):
@@ -70,6 +72,8 @@ news_name = ['hpv疫苗', 'iPhone X', '乌镇互联网大会', '九寨沟7.0级�
              '王宝强马蓉离婚案', '百度无人驾驶汽车', '红黄蓝幼儿园', '绝地求生 吃鸡', '英国脱欧',
              '萨德系统 中韩', '雄安新区', '榆林产妇坠楼']
 
+# news_name = ['德国大选']
+
 def main():
     for news in news_name:
         #得到标签
@@ -85,27 +89,20 @@ def main():
 
         print news, '总句子数=', sentHome.sentnum
 
+        cur_path = unicode(outDir+news, 'utf8')
+        if not os.path.exists(cur_path):
+            os.mkdir(cur_path)
+
         for label in labels:
             blocks = sentblock(label, sentHome)
-            dic = {}
+            f = open(unicode(outDir+news+'/'+label+'.txt', 'utf8'), 'w')
             for block in blocks:
                 for i in block:
-                    if i not in dic:
-                        dic[i] = 0
-            print label, '总块数=', len(blocks), '不同的句子数=', len(dic)
+                    c = sentHome.allsent[i]
+                    f.write(str(c.newsid)+' '+str(c.globalid)+' '+str(c.paraid)+' '+str(c.localid)+' '+str(c.sentnum)+'\n')
+                    f.write(c.content+'\n')
+            f.close()
 
-            # print 'write'
-            # f = open('see.txt', 'w')
-            # for block in blocks:
-            #     f.write('block:\n')
-            #     for i in block:
-            #         f.write(str(i)+' ')
-            #         f.write(str(sentHome.allsent[i].newsid)+' '+\
-            #             str(sentHome.allsent[i].globalid)+' '+\
-            #             str(sentHome.allsent[i].paraid)+' '+\
-            #             str(sentHome.allsent[i].localid)+' '+\
-            #             str(sentHome.allsent[i].sentnum)+'\n')
-            # f.close()
 
 if __name__ == '__main__':
     main()
