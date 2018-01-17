@@ -19,11 +19,11 @@ news_name = ['hpv疫苗', 'iPhone X', '乌镇互联网大会', '九寨沟7.0级�
              '萨德系统 中韩', '雄安新区', '榆林产妇坠楼']
 
 
-def different_order(la, lb):
-    if len(la) != len(lb):
+def different_order(l1, l2):
+    if len(l1) != len(l2):
         return False
-    for l in la:
-        if l not in lb:
+    for ll in l1:
+        if ll not in l2:
             return False
     return True
 
@@ -36,7 +36,7 @@ for news in news_name:
         content += line + '\n'
     f.close()
     label = []  # 已经得到的label集合
-    rest = []   # 剩余label集合
+    rest = []  # 剩余label集合
     cur_file = open(root_dir + news + '.txt', 'r')
     for line in cur_file:
         line = line.strip().split()
@@ -46,7 +46,7 @@ for news in news_name:
         flag = True
         la_s = la.split('+')
         for i, lb in enumerate(label):
-            if (la.replace('+','') in lb.replace('+','')) or (lb.replace('+','') in la.replace('+','')):
+            if (la.replace('+', '') in lb.replace('+', '')) or (lb.replace('+', '') in la.replace('+', '')):
                 flag = False
                 break
             lb_s = lb.split('+')
@@ -56,9 +56,9 @@ for news in news_name:
             if len(la_s) == 3 and len(lb_s) == 3:
                 tmp_l = '!@#$'
                 if la_s[1] == lb_s[0] and la_s[2] == lb_s[1]:
-                    tmp_l = la_s[0] + ' ' + lb.replace('+',' ')
+                    tmp_l = la_s[0] + ' ' + lb.replace('+', ' ')
                 elif la_s[0] == lb_s[1] and la_s[1] == lb_s[2]:
-                    tmp_l = lb_s[0] + ' ' + la.replace('+',' ')
+                    tmp_l = lb_s[0] + ' ' + la.replace('+', ' ')
                 if content.count(tmp_l, 0, len(content)) >= min_count:
                     label[i] = tmp_l.replace(' ', '+')
                     flag = False
