@@ -9,13 +9,17 @@ from pyltp import Segmentor
 import gensim
 import os
 
-# 加载word2vec模型
-model = gensim.models.Word2Vec.load('model')
-vec_size = 100
+qin = 1 #改成0是刘辉的路径，否则是秦文涛的路径
 
 # 加载分词模型
 segmentor = Segmentor()
-segmentor.load('/Users/liuhui/Desktop/实验室/LTP/ltp_data_v3.4.0/cws.model')
+if qin == 1:
+    segmentor.load('D:/coding/Python2.7/ltp_data_v3.4.0/cws.model')
+    model = gensim.models.Word2Vec.load('../Sentence/model_qin')
+else:
+    segmentor.load('/Users/liuhui/Desktop/实验室/LTP/ltp_data_v3.4.0/cws.model')
+    model = gensim.models.Word2Vec.load('../Sentence/model')
+vec_size = 100
 
 # 相似度超过此值的都会分配到对应标签下
 gate = 0.6
@@ -75,7 +79,7 @@ for news in news_name:
 
     # 得到所有标签
     label_list = []
-    f = open('label/' + news + '/label.txt', 'r')
+    f = open(unicode('label/' + news + '/label.txt','utf8'), 'r')
     for line in f:
         label_list.append(line.strip())
     f.close()
@@ -92,7 +96,7 @@ for news in news_name:
 
     # 读取该新闻的所有句子，得到句子的向量表示
     sentence_list = []
-    f = open('sentence/' + news + '/sentence.txt', 'r')
+    f = open(unicode('sentence/' + news + '/sentence.txt','utf8'), 'r')
     while True:
         info = f.readline()
         if len(info) < 2:
@@ -111,36 +115,52 @@ for news in news_name:
     # 给每一个标签分配句子
     for i, label in enumerate(label_list):
         sen_assign = []  # 存储已分配句子的编号
+        blocks = []
         for j, sen in enumerate(sentence_list):
+            block = []
             cur_sim = cos_similarity(label_vec_list[i], sen.vec)
             if cur_sim < gate:
                 continue
+            if j > 0 and sentence_list[j - 1].para_idx == sen.para_idx and j - 1 not in sen_assign \
+                     and sentence_list[j - 1].news_idx == sen.news_idx:
+                sen_assign.append(j - 1)
+                block.append(j-1)
             if j not in sen_assign:
                 sen_assign.append(j)
-            if j > 0 and sentence_list[j - 1].para_idx == sen.para_idx and j - 1 not in sen_assign:
-                sen_assign.append(j - 1)
-            if j < len(sentence_list) - 1 and sentence_list[j + 1].para_idx == sen.para_idx and j + 1 not in sen_assign:
+                block.append(j)
+            if j < len(sentence_list) - 1 and sentence_list[j + 1].para_idx == sen.para_idx and j + 1 not in sen_assign\
+                    and sentence_list[j + 1].news_idx == sen.news_idx:
                 sen_assign.append(j + 1)
+                block.append(j+1)
+            blocks.append(block)
         if len(sen_assign) < 10:
             for j, sen in enumerate(sentence_list):
+                block = []
                 cur_sim = cos_similarity(label_vec_list[i], sen.vec)
                 if cur_sim < gate_1:
                     continue
+                if j > 0 and sentence_list[j - 1].para_idx == sen.para_idx and j - 1 not in sen_assign \
+                         and sentence_list[j - 1].news_idx == sen.news_idx:
+                    sen_assign.append(j - 1)
+                    block.append(j-1)
                 if j not in sen_assign:
                     sen_assign.append(j)
-                if j > 0 and sentence_list[j - 1].para_idx == sen.para_idx and j - 1 not in sen_assign:
-                    sen_assign.append(j - 1)
-                if j < len(sentence_list) - 1 and sentence_list[
-                    j + 1].para_idx == sen.para_idx and j + 1 not in sen_assign:
+                    block.append(j)
+                if j < len(sentence_list) - 1 and sentence_list[j + 1].para_idx == sen.para_idx and j + 1 not in sen_assign\
+                        and sentence_list[j + 1].news_idx == sen.news_idx:
                     sen_assign.append(j + 1)
+                    block.append(j+1)
+                blocks.append(block)
 
         path = 'assign/word2vec/' + news
-        if not os.path.exists(path):
-            os.mkdir(path)
-        f = open(path + '/' + label.replace('+', '') + '.txt', 'w')
-        for j in sen_assign:
-            f.write(sentence_list[j].news_idx + ' ' + sentence_list[j].sen_idx + ' ' + sentence_list[j].para_idx + ' '
-                    + sentence_list[j].para_off + ' ' + sentence_list[j].para_size + ' '
-                    + str(round(cos_similarity(label_vec_list[i], sentence_list[j].vec), 3)) + '\n')
-            f.write(sentence_list[j].content + '\n')
+        if not os.path.exists(unicode(path, 'utf8')):
+            os.mkdir(unicode(path, 'utf8'))
+        f = open(unicode(path + '/' + label.replace('+', '') + '.txt', 'utf8'), 'w')
+        for block in blocks:
+            f.write(str(len(block))+ '\n')
+            for j in block:
+                f.write(sentence_list[j].news_idx + ' ' + sentence_list[j].sen_idx + ' ' + sentence_list[j].para_idx + ' '
+                        + sentence_list[j].para_off + ' ' + sentence_list[j].para_size + ' '
+                        + str(round(cos_similarity(label_vec_list[i], sentence_list[j].vec), 3)) + '\n')
+                f.write(sentence_list[j].content + '\n')
         f.close()

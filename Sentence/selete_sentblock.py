@@ -40,6 +40,7 @@ class SentHome:
             sent = Sent(nums[0], nums[1], nums[2], nums[3], nums[4], content)
             self.allsent.append(sent)
             self.sentnum += 1
+        f.close()
 
 
 def sentblock(label, sentHome):
@@ -105,6 +106,7 @@ def main():
             blocks = sentblock(label, sentHome)
             f = open(unicode(outDir + news + '/' + label + '.txt', 'utf8'), 'w')
             for block in blocks:
+                f.write(str(len(block))+'\n')
                 for i in block:
                     c = sentHome.allsent[i]
                     f.write(
