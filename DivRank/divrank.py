@@ -5,13 +5,15 @@ from pyltp import Segmentor
 from numpy import * #用于矩阵运算
 import copy         #用于深复制
 
-# w2vDir = 'D:/大三上/WebDataMining/data_wdm_assignment_3/qa/corpus/'
-
+qin = 1 #改成0是刘辉的路径，否则是秦文涛的路径
 # 加载分词模型
 segmentor = Segmentor()
-segmentor.load('D:/coding/Python2.7/ltp_data_v3.4.0/cws.model')
-
-model = gensim.models.Word2Vec.load('../Sentence/model')
+if qin == 1:
+    segmentor.load('D:/coding/Python2.7/ltp_data_v3.4.0/cws.model')
+    model = gensim.models.Word2Vec.load('../Sentence/model_qin')
+else:
+    segmentor.load('/Users/liuhui/Desktop/实验室/LTP/ltp_data_v3.4.0/cws.model')
+    model = gensim.models.Word2Vec.load('../Sentence/model')
 vec_size = 100
 
 class Sent:
@@ -62,41 +64,30 @@ def block_simi(block1, block2):
 
 #返回news下label对应的块，以及它们的DivRank得分
 def blockscore(blockDir, news, label):
-    #得到该标签下所有句子
-    allsent = []
+
+    #得到该标签下所有块
     f = open(unicode(blockDir+news+'/'+label+'.txt','utf8'), 'r')
-    while True:
-        nums = f.readline()
-        if len(nums) == 0:
-            break
-        nums = nums.strip().split()
-        nums = [int(num) for num in nums]
-        content = f.readline().strip()
-        words = segmentor.segment(content)
-        word_vec_list = []
-        for word in words:
-            if word in model:
-                word_vec_list.append(model[word])
-        sent = Sent(nums[0],nums[1],nums[2],nums[3],nums[4],content,mean_vec(word_vec_list))
-        allsent.append(sent)
-    f.close()
-
-    #在contain中，一个块中的句子在globalid上是连续递增的，依次关系得到各个块
-    #在word2vec中，即有递增的也有递减的，为了统一起见，需要改一下代码
-
     blocks = []
-    l = len(allsent)
-    i = 0
-    while i < l:
-        block = [allsent[i]]
-        curnewsid = allsent[i].newsid
-        curgolbalid = allsent[i].globalid
-        i += 1
-        while i < l and allsent[i].newsid == curnewsid and allsent[i].globalid == curgolbalid+1:
-            block.append(allsent[i])
-            curgolbalid = allsent[i].globalid
-            i += 1
+    while True:
+        n = f.readline() #第一行记录了下面几个句子是一个块
+        if len(n) == 0:
+            break
+        block = []
+        n = int(n.strip())
+        for i in range(0, n):
+            nums = f.readline()
+            nums = nums.strip().split()
+            nums = [int(num) for num in nums]
+            content = f.readline().strip()
+            words = segmentor.segment(content)
+            word_vec_list = []
+            for word in words:
+                if word in model:
+                    word_vec_list.append(model[word])
+            sent = Sent(nums[0],nums[1],nums[2],nums[3],nums[4],content,mean_vec(word_vec_list))
+            block.append(sent)
         blocks.append(block)
+    f.close()
 
     blockcnt = len(blocks)
 
