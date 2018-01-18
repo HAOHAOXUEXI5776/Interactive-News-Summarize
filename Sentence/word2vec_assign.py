@@ -15,7 +15,8 @@ vec_size = 100
 
 # 加载分词模型
 segmentor = Segmentor()
-segmentor.load('/Users/liuhui/Desktop/实验室/LTP/ltp_data_v3.4.0/cws.model')
+# segmentor.load('/Users/liuhui/Desktop/实验室/LTP/ltp_data_v3.4.0/cws.model')
+segmentor.load('D:/coding/Python2.7/ltp_data_v3.4.0/cws.model')
 
 # 相似度超过此值的都会分配到对应标签下
 gate = 0.6
@@ -115,29 +116,32 @@ for news in news_name:
             cur_sim = cos_similarity(label_vec_list[i], sen.vec)
             if cur_sim < gate:
                 continue
+            if j > 0 and sentence_list[j - 1].para_idx == sen.para_idx \
+                     and sentence_list[j - 1].news_idx == sen.news_idx and j - 1 not in sen_assign:
+                sen_assign.append(j - 1)
             if j not in sen_assign:
                 sen_assign.append(j)
-            if j > 0 and sentence_list[j - 1].para_idx == sen.para_idx and j - 1 not in sen_assign:
-                sen_assign.append(j - 1)
-            if j < len(sentence_list) - 1 and sentence_list[j + 1].para_idx == sen.para_idx and j + 1 not in sen_assign:
+            if j < len(sentence_list) - 1 and sentence_list[j + 1].para_idx == sen.para_idx \
+                and sentence_list[j + 1].news_idx == sen.news_idx and j + 1 not in sen_assign:
                 sen_assign.append(j + 1)
         if len(sen_assign) < 10:
             for j, sen in enumerate(sentence_list):
                 cur_sim = cos_similarity(label_vec_list[i], sen.vec)
-                if cur_sim < gate_1:
+                if cur_sim < gate1:
                     continue
+                if j > 0 and sentence_list[j - 1].para_idx == sen.para_idx \
+                         and sentence_list[j - 1].news_idx == sen.news_idx and j - 1 not in sen_assign:
+                    sen_assign.append(j - 1)
                 if j not in sen_assign:
                     sen_assign.append(j)
-                if j > 0 and sentence_list[j - 1].para_idx == sen.para_idx and j - 1 not in sen_assign:
-                    sen_assign.append(j - 1)
-                if j < len(sentence_list) - 1 and sentence_list[
-                    j + 1].para_idx == sen.para_idx and j + 1 not in sen_assign:
+                if j < len(sentence_list) - 1 and sentence_list[j + 1].para_idx == sen.para_idx \
+                    and sentence_list[j + 1].news_idx == sen.news_idx and j + 1 not in sen_assign:
                     sen_assign.append(j + 1)
-
         path = 'assign/word2vec/' + news
         if not os.path.exists(path):
             os.mkdir(path)
         f = open(path + '/' + label.replace('+', '') + '.txt', 'w')
+        f.write(str(len(sen_assign))+'\n')
         for j in sen_assign:
             f.write(sentence_list[j].news_idx + ' ' + sentence_list[j].sen_idx + ' ' + sentence_list[j].para_idx + ' '
                     + sentence_list[j].para_off + ' ' + sentence_list[j].para_size + ' '
