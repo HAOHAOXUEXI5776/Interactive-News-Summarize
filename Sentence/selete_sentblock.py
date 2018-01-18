@@ -7,7 +7,7 @@ import os
 
 labelDir = './label/'
 sentDir = './sentence/'
-outDir = './sentence/assign/'
+outDir = './assign/contain/'
 
 class Sent:
     def __init__(self, _newsid, _globalid, _paraid, _localid, _sentnum, _content):
