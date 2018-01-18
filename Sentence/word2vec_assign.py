@@ -15,10 +15,10 @@ qin = 1 #改成0是刘辉的路径，否则是秦文涛的路径
 segmentor = Segmentor()
 if qin == 1:
     segmentor.load('D:/coding/Python2.7/ltp_data_v3.4.0/cws.model')
-    model = gensim.models.Word2Vec.load('../Sentence/model_qin')
+    model = gensim.models.Word2Vec.load('model_qin')
 else:
     segmentor.load('/Users/liuhui/Desktop/实验室/LTP/ltp_data_v3.4.0/cws.model')
-    model = gensim.models.Word2Vec.load('../Sentence/model')
+    model = gensim.models.Word2Vec.load('model')
 vec_size = 100
 
 # 相似度超过此值的都会分配到对应标签下
