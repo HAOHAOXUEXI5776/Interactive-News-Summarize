@@ -36,6 +36,7 @@ class SentHome:
             sent = Sent(nums[0],nums[1],nums[2],nums[3],nums[4],content)
             self.allsent.append(sent)
             self.sentnum += 1
+        f.close()
 
 def sentblock(label, sentHome):
     #返回标签label的块

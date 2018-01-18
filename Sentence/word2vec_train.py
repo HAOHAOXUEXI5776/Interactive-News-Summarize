@@ -12,10 +12,11 @@ news_name = ['hpv疫苗', 'iPhone X', '乌镇互联网大会', '九寨沟7.0级�
 data = []
 
 for news in news_name:
-    f = open('../Ngrams/Processed/' + news + '/words.txt', 'r')
+    f = open(unicode('../Ngrams/Processed/' + news + '/words.txt','utf8'), 'r')
     for line in f:
         line = line.strip().split()
         data.append(line)
+    f.close()
 model = word2vec.Word2Vec(data, iter=100)
 model.save('model')
 
