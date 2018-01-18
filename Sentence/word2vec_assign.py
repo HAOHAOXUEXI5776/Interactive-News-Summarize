@@ -9,7 +9,7 @@ from pyltp import Segmentor
 import gensim
 import os
 
-qin = 1 #改成0是刘辉的路径，否则是秦文涛的路径
+qin = 1  # 改成0是刘辉的路径，否则是秦文涛的路径
 
 # 加载分词模型
 segmentor = Segmentor()
@@ -79,7 +79,7 @@ for news in news_name:
 
     # 得到所有标签
     label_list = []
-    f = open(unicode('label/' + news + '/label.txt','utf8'), 'r')
+    f = open(unicode('label/' + news + '/label.txt', 'utf8'), 'r')
     for line in f:
         label_list.append(line.strip())
     f.close()
@@ -96,7 +96,7 @@ for news in news_name:
 
     # 读取该新闻的所有句子，得到句子的向量表示
     sentence_list = []
-    f = open(unicode('sentence/' + news + '/sentence.txt','utf8'), 'r')
+    f = open(unicode('sentence/' + news + '/sentence.txt', 'utf8'), 'r')
     while True:
         info = f.readline()
         if len(info) < 2:
@@ -122,16 +122,16 @@ for news in news_name:
             if cur_sim < gate:
                 continue
             if j > 0 and sentence_list[j - 1].para_idx == sen.para_idx and j - 1 not in sen_assign \
-                     and sentence_list[j - 1].news_idx == sen.news_idx:
+                    and sentence_list[j - 1].news_idx == sen.news_idx:
                 sen_assign.append(j - 1)
-                block.append(j-1)
+                block.append(j - 1)
             if j not in sen_assign:
                 sen_assign.append(j)
                 block.append(j)
-            if j < len(sentence_list) - 1 and sentence_list[j + 1].para_idx == sen.para_idx and j + 1 not in sen_assign\
+            if j < len(sentence_list) - 1 and sentence_list[j + 1].para_idx == sen.para_idx and j + 1 not in sen_assign \
                     and sentence_list[j + 1].news_idx == sen.news_idx:
                 sen_assign.append(j + 1)
-                block.append(j+1)
+                block.append(j + 1)
             blocks.append(block)
         if len(sen_assign) < 10:
             for j, sen in enumerate(sentence_list):
@@ -140,16 +140,17 @@ for news in news_name:
                 if cur_sim < gate_1:
                     continue
                 if j > 0 and sentence_list[j - 1].para_idx == sen.para_idx and j - 1 not in sen_assign \
-                         and sentence_list[j - 1].news_idx == sen.news_idx:
+                        and sentence_list[j - 1].news_idx == sen.news_idx:
                     sen_assign.append(j - 1)
-                    block.append(j-1)
+                    block.append(j - 1)
                 if j not in sen_assign:
                     sen_assign.append(j)
                     block.append(j)
-                if j < len(sentence_list) - 1 and sentence_list[j + 1].para_idx == sen.para_idx and j + 1 not in sen_assign\
+                if j < len(sentence_list) - 1 and sentence_list[
+                    j + 1].para_idx == sen.para_idx and j + 1 not in sen_assign \
                         and sentence_list[j + 1].news_idx == sen.news_idx:
                     sen_assign.append(j + 1)
-                    block.append(j+1)
+                    block.append(j + 1)
                 blocks.append(block)
 
         path = 'assign/word2vec/' + news
@@ -157,10 +158,11 @@ for news in news_name:
             os.mkdir(unicode(path, 'utf8'))
         f = open(unicode(path + '/' + label.replace('+', '') + '.txt', 'utf8'), 'w')
         for block in blocks:
-            f.write(str(len(block))+ '\n')
+            f.write(str(len(block)) + '\n')
             for j in block:
-                f.write(sentence_list[j].news_idx + ' ' + sentence_list[j].sen_idx + ' ' + sentence_list[j].para_idx + ' '
-                        + sentence_list[j].para_off + ' ' + sentence_list[j].para_size + ' '
-                        + str(round(cos_similarity(label_vec_list[i], sentence_list[j].vec), 3)) + '\n')
+                f.write(
+                    sentence_list[j].news_idx + ' ' + sentence_list[j].sen_idx + ' ' + sentence_list[j].para_idx + ' '
+                    + sentence_list[j].para_off + ' ' + sentence_list[j].para_size + ' '
+                    + str(round(cos_similarity(label_vec_list[i], sentence_list[j].vec), 3)) + '\n')
                 f.write(sentence_list[j].content + '\n')
         f.close()
