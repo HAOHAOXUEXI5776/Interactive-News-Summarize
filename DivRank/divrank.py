@@ -12,7 +12,6 @@ segmentor = Segmentor()
 segmentor.load('D:/coding/Python2.7/ltp_data_v3.4.0/cws.model')
 
 model = gensim.models.Word2Vec.load('../Sentence/model')
-# model = word2vec.Word2Vec.load('../Sentence/model')
 vec_size = 100
 
 class Sent:
@@ -76,9 +75,8 @@ def blockscore(blockDir, news, label):
         words = segmentor.segment(content)
         word_vec_list = []
         for word in words:
-            uw = word
-            if uw in model:
-                word_vec_list.append(model[uw])
+            if word in model:
+                word_vec_list.append(model[word])
         sent = Sent(nums[0],nums[1],nums[2],nums[3],nums[4],content,mean_vec(word_vec_list))
         allsent.append(sent)
     f.close()
