@@ -98,6 +98,7 @@ def main():
             blocks = sentblock(label, sentHome)
             f = open(unicode(outDir+news+'/'+label+'.txt', 'utf8'), 'w')
             for block in blocks:
+                f.write(str(len(block))+'\n')
                 for i in block:
                     c = sentHome.allsent[i]
                     f.write(str(c.newsid)+' '+str(c.globalid)+' '+str(c.paraid)+' '+str(c.localid)+' '+str(c.sentnum)+'\n')
