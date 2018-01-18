@@ -111,7 +111,7 @@ def blockscore(blockDir, news, label):
         sumi = sum(p0[i])
         if sumi != 0.0:
             p0[i] = [p0[i][j]/sumi for j in range(0, blockcnt)]
-    p0 = mat(p0) #block*block维矩阵
+    p0 = mat(p0) #blockcnt*blockcnt维矩阵
 
     pt = copy.deepcopy(p0) #深复制，p0的值需要保留，pt每时刻都要变化
 
@@ -139,9 +139,51 @@ def blockscore(blockDir, news, label):
         if stop:
             break
 
-    return blocks, pai
+    tpai = [pai[0,j] for j in range(0, blockcnt)]
+    return blocks, tpai
+
+
+#将outblock插入到inblock中，返回
+def merge(outblock, inblock):
+    #对于outblock的句子，如果与inblock中的每个句子的相似度都小于min_simi，则将其插入到inblock
+    #因为inblock肯定是连贯的，不像论文中那样寻找inblock的一个空插进去，而是把句子插到末尾
+    min_simi = 0.6
+    for sent1 in outblock:
+        ok = True
+        for sent2 in inblock:
+            if cos_similarity(sent1.vec, sent2.vec) >= min_simi:
+                ok = False
+                break
+        if ok:
+            inblock.append(sent1)
+    return inblock
+
+#根据标签的块，以及块的得分，得到关于该标签的综述
+def summery(blocks, bscore):
+    O = []
+    l = len(blocks)
+    #基数排序
+    index = [i for i in range(0, l)]
+    for i in range(0, l):
+        for j in range(i+1, l):
+            if bscore[index[i]] < bscore[index[j]]:
+                index[i], index[j] = index[j], index[i]
+    for i in range(0, l):
+        curi = index[i]
+        max_simi = 0.0
+        for block in O:
+            if block_simi(block, blocks[curi]) > max_simi:
+                max_simi = block_simi(block, blocks[curi])
+                most_simi_block = block
+        if max_simi > 0.4:
+            most_simi_block = merge(blocks[curi], most_simi_block)
+        else:
+            O.append(blocks[curi])
+
+    return O
 
 blockDir = '../Sentence/assign/contain/'
+# blockDir = '../Sentence/assign/word2vec/'
 news = 'hpv疫苗'
 label = '世界卫生组织'
 
@@ -149,8 +191,17 @@ blocks, bscore = blockscore(blockDir, news, label)
 
 f = open('see.txt', 'w')
 for i, block in enumerate(blocks):
-    f.write(str(bscore[0,i])+'\n')
+    f.write(str(bscore[i])+'\n')
     for sent in block:
-        f.write(sent.content)
+        f.write(sent.content+'\n')
     f.write('\n\n')
+f.close()
+
+O = summery(blocks, bscore)
+
+f = open('seeO.txt', 'w')
+for block in O:
+    for sent in block:
+        f.write(sent.content+'\n')
+    f.write('\n')
 f.close()
