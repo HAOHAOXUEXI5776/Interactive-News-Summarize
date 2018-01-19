@@ -160,7 +160,7 @@ def blockscore(blockDir, news, label, way):
 
 # 可调参数
 way = 'divRank'
-block_type = 'contain'
+block_type = 'contain_block'
 news = 'hpv疫苗'
 label = '世界卫生组织'
 
@@ -168,10 +168,10 @@ blockDir = '../Sentence/assign/' + block_type + '/'
 blocks, bscore = blockscore(blockDir, news, label, way)
 
 # 按照rank分排序输出
-l = len(blocks)
-index = [i for i in range(0, l)]
-for i in range(0, l):
-    for j in range(i+1, l):
+lb = len(blocks)
+index = [i for i in range(0, lb)]
+for i in range(0, lb):
+    for j in range(i+1, lb):
         if bscore[0, index[i]] < bscore[0, index[j]]:
             index[i], index[j] = index[j], index[i]
 
