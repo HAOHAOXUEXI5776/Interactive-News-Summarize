@@ -63,7 +63,15 @@ def block_simi(block1, block2):
     return max_simi
 
 
-#返回news下label对应的块，以及它们的DivRank得分
+def cut(P, i):
+    #返回将P的第i行和第j列去掉的矩阵
+    Q = copy.deepcopy(P)
+    Q = delete(Q, i, axis = 1) #删除第i列
+    Q = delete(Q, i, axis = 0)  #删除第i行
+    return Q
+
+#使用带吸收的pagerank
+#返回news下label对应的块，以及它们降序的排分，以及对应的index
 def blockscore(blockDir, news, label):
 
     #得到该标签下所有块
@@ -92,7 +100,7 @@ def blockscore(blockDir, news, label):
 
     blockcnt = len(blocks)
 
-    #DivRank部分
+    #PageRank部分
 
     unipai = [1/float(blockcnt) for i in range(0, blockcnt)]
     unipai = mat(unipai) #1*blockcnt维矩阵
@@ -106,32 +114,29 @@ def blockscore(blockDir, news, label):
     for i in range(0, blockcnt):
         for j in range(i+1, blockcnt):
             simi = block_simi(blocks[i], blocks[j])
-            if simi > 0.1:
-                p0[i][j] = p0[j][i] = simi
-
+            p0[i][j] = p0[j][i] = simi
     #对转移概率归一化
     for i in range(0, blockcnt):
         sumi = sum(p0[i])
         if sumi != 0.0:
             p0[i] = [p0[i][j]/sumi for j in range(0, blockcnt)]
-    p0 = mat(p0) #blockcnt*blockcnt维矩阵
 
-    pt = copy.deepcopy(p0) #深复制，p0的值需要保留，pt每时刻都要变化
+    #写入图文件
+    f = open(unicode('graph/'+label+'.txt', 'utf8'), 'w')
+    for i in range(0, blockcnt):
+        for j in range(0, blockcnt):
+            f.write(str(p0[i][j])+' ')
+        f.write('\n')
+    f.close()
+
+
+    p0 = mat(p0) #blockcnt*blockcnt维矩阵
 
     iters = 100
     a = 0.8
     for i in range(0, iters):
         oldpai = copy.deepcopy(pai)
-        # pai = a*oldpai*p0 + (1-a)*unipai #pageRank
-
-        pai = a*oldpai*pt + (1-a)*unipai
-        #DivRank对pt的更新
-        for u in range(0, blockcnt):
-            for v in range(0, blockcnt):
-                pt[u,v] = p0[u,v]*pai[0,v]
-            D = (pai*p0[u].T)[0,0]
-            if D != 0.0:
-                pt[u] = pt[u]/D
+        pai = a*oldpai*p0 + (1-a)*unipai #pageRank
 
         #pai几乎不变，则停止迭代
         stop = True
@@ -142,8 +147,38 @@ def blockscore(blockDir, news, label):
         if stop:
             break
 
-    tpai = [pai[0,j] for j in range(0, blockcnt)]
-    return blocks, tpai
+    # 吸收部分
+
+    # 选出pai值最大的那个
+    maxpai, maxi = 0.0, 0
+    for i in range(0, blockcnt):
+        if pai[0, i] > maxpai:
+            maxpai = pai[0, i]
+            maxi = i
+    score = [maxpai]
+    index = [maxi]
+    Q = cut(p0, maxi) #得到删除p0的第maxi行和第maxi列的矩阵
+    for i in range(1, blockcnt):
+        #迭代blockcnt - 1次，得到其余所有点的得分
+        left = blockcnt - i
+        N = (eye(left) - Q).I #eye(left)为left*left维单位矩阵，I为求逆
+        onev = mat(ones(left)) #1*left维全1向量
+        v = onev*N/left
+        #找到v中最大的那个maxv，和它的原来的index-maxj
+        maxv, maxj = 0.0, 0
+        k, cutk = 0, 0
+        for j in range(0, blockcnt):
+            if j not in index:
+                if v[0,k] > maxv:
+                    maxv = v[0,k]
+                    maxj = j
+                    cutk = k
+                k += 1
+        score.append(maxv)
+        index.append(maxj)
+        Q = cut(Q, cutk)
+
+    return blocks, score, index
 
 
 #将outblock插入到inblock中，返回
@@ -202,21 +237,15 @@ for news in news_name:
     f.close()
     for label in labels:
         print label
-        blocks, bscore = blockscore(blockDir, news, label)
+        blocks, bscore, index = blockscore(blockDir, news, label)
 
         path = outDir+news
         if not os.path.exists(unicode(path, 'utf8')):
             os.mkdir(unicode(path, 'utf8'))
 
         f = open(unicode(path+'/'+label+'.txt', 'utf8'), 'w')
-        #基数排序
-        l = len(blocks)
-        index = [i for i in range(0, l)]
-        for i in range(0, l):
-            for j in range(i+1, l):
-                if bscore[index[i]] < bscore[index[j]]:
-                    index[i], index[j] = index[j], index[i]
-        for i in range(0, l):
+        blockcnt = len(blocks)
+        for i in range(0, blockcnt):
             curi = index[i]
             f.write(str(bscore[curi])+'\n')
             for sent in blocks[curi]:
@@ -224,7 +253,7 @@ for news in news_name:
             f.write('\n\n')
         f.close()
 
-
+        '''
         O = summery(blocks, bscore)
 
         f = open(unicode(path+'/'+label+'_summary.txt', 'utf8'), 'w')
@@ -233,4 +262,4 @@ for news in news_name:
                 f.write(sent.content+'\n')
             f.write('\n')
         f.close()
-
+        '''
