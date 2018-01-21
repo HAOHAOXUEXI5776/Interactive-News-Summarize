@@ -17,7 +17,6 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.decomposition import LatentDirichletAllocation
 import numpy as np
 
-
 newsName = ['德国大选', '俄罗斯世界杯', '功守道', '九寨沟7.0级地震', '权力的游戏',
             '双十一购物节', '乌镇互联网大会', '战狼2', 'hpv疫苗', 'iPhone X',
             '李晨求婚范冰冰', '江歌刘鑫', '王宝强马蓉离婚案', '百度无人驾驶汽车', '红黄蓝幼儿园',
@@ -25,8 +24,8 @@ newsName = ['德国大选', '俄罗斯世界杯', '功守道', '九寨沟7.0级�
 
 ori_dir = 'feature/'
 out_dir = 'feature_lda/'
-n_components = 10   # lda主题数
-max_iter = 100       # lda迭代次数
+n_components = 10  # lda主题数
+max_iter = 100  # lda迭代次数
 
 
 # 从feature文件夹读入ngram，人工打分，原始特征
@@ -46,7 +45,6 @@ def read_feature(news):
 
 # LDA建模，返回doc-topic分布，topic-word分布，word和id的映射关系，分词后的文档集合
 def lda(news):
-
     # 从文件导入停用词表
     stopword = []
     stopword_file = open('../stopword.txt', 'r')
@@ -66,13 +64,13 @@ def lda(news):
     # 将分词后的新闻变成tf向量，同时去除停用词，去掉低频词
     tf_vectorizer = CountVectorizer(min_df=3, stop_words=stopword)
     tf = tf_vectorizer.fit_transform(doc_set)
-    idx_word = tf_vectorizer.get_feature_names()    # 从id找到word
-    word_idx = {}   # 从word找到id
+    idx_word = tf_vectorizer.get_feature_names()  # 从id找到word
+    word_idx = {}  # 从word找到id
     for idx, word in enumerate(idx_word):
         word_idx[word] = idx
 
     # LDA建模，返回两个分布
-    model = LatentDirichletAllocation(n_components=n_components, max_iter=max_iter, learning_method='online',)
+    model = LatentDirichletAllocation(n_components=n_components, max_iter=max_iter, learning_method='online', )
     doc_topic = model.fit_transform(tf)
     topic_word = model.components_ / model.components_.sum(axis=1)[:, np.newaxis]
 
@@ -92,17 +90,17 @@ def normalize(f):
         f[i] = (f[i] - min_f) / (max_f - min_f)
     return f
 
+
 # 计算lda_f1
 def compute_f1(ngram_list, topic_word, word_idx):
-
     lda_f1 = [0.0 for i in range(0, len(ngram_list))]
 
     # 依次考虑每个ngram
     for i, ngram in enumerate(ngram_list):
-        idx = []     # 存放ngram中所含word编号
+        idx = []  # 存放ngram中所含word编号
         for word in ngram:
-            if word_idx.has_key(unicode(word,'utf-8')):
-                idx.append(word_idx[unicode(word,'utf-8')])
+            if word_idx.has_key(unicode(word, 'utf-8')):
+                idx.append(word_idx[unicode(word, 'utf-8')])
 
         for topic in topic_word:
             cur_p = 0.0
@@ -126,9 +124,9 @@ def find_related_doc(doc_set, ngram):
             ngram_doc_set.append(i)
     return ngram_doc_set
 
+
 # 计算lda_f2和lda_f3
 def compute_f23(doc_set, ngram_list, doc_topic):
-
     lda_f2 = [0.0 for i in range(0, len(ngram_list))]
     lda_f3 = [0.0 for i in range(0, len(ngram_list))]
 
@@ -153,10 +151,10 @@ def compute_f23(doc_set, ngram_list, doc_topic):
 def write_feature(news, ngram, score, feature, lda_f1, lda_f2, lda_f3):
     l = len(ngram)
     f = open(out_dir + news + '.txt', 'w')
-    for i in range(0,l):
+    for i in range(0, l):
         nl = len(ngram[i])
         f.write(ngram[i][0])
-        for j in range(1,nl):
+        for j in range(1, nl):
             f.write('+' + str(ngram[i][j]))
         f.write(' ' + str(score[i]))
         for fea in feature[i]:
@@ -166,6 +164,7 @@ def write_feature(news, ngram, score, feature, lda_f1, lda_f2, lda_f3):
         f.write(' ' + str(lda_f3[i]))
         f.write('\n')
     f.close()
+
 
 def main():
     for news in newsName:
