@@ -4,8 +4,7 @@
 # 回归方法：线性回归，岭回归，svr，决策树，knn，随机森林
 # 需要调整的参数：
 # 1.标注数据和未标注数据的比例
-# 2.feature文件夹
-# 3.各回归方法自己的参数
+# 2.各回归方法自己的参数
 
 import random
 from sklearn import linear_model
@@ -57,8 +56,7 @@ def randomForestRegre(X, Y, N, _criterion):
     return reg
 
 
-# 用于评价回归效果，tY是预测分数，Y是人工打分
-# 返回score(前20个的总得分)，P@5，P@10，P@20以及回归分数排序后的列表
+# 用于评价回归效果，tY是预测分数，Y是人工打分，返回P@5，P@10，P@20
 def evaluate(tY, Y):
     # 统计人工标记过的ngram
     l = len(Y)
@@ -79,17 +77,6 @@ def evaluate(tY, Y):
             if tY[index[i]] < tY[index[j]]:
                 index[i], index[j] = index[j], index[i]
 
-    # 计算score
-    cnt1, cnt2, cnt3 = 0, 0, 0
-    for i in range(0, 20):
-        if index[i] in id1:
-            cnt1 += 1
-        elif index[i] in id2:
-            cnt2 += 1
-        elif index[i] in id3:
-            cnt3 += 1
-    score = cnt1 + 2 * cnt2 + 3 * cnt3
-
     # 计算P@5，P@10，P@20
     P_5, P_10, P_20 = 0.0, 0.0, 0.0
     for i in range(0, 5):
@@ -105,7 +92,7 @@ def evaluate(tY, Y):
             P_20 += 1
     P_20 /= 20
 
-    return score, P_5, P_10, P_20
+    return P_5, P_10, P_20
 
 
 newsName = ['hpv疫苗', 'iPhone X', '乌镇互联网大会', '九寨沟7.0级地震', '俄罗斯世界杯',
@@ -114,11 +101,10 @@ newsName = ['hpv疫苗', 'iPhone X', '乌镇互联网大会', '九寨沟7.0级�
             '萨德系统 中韩', '雄安新区', '榆林产妇坠楼']
 
 
-# 采用二十折交叉验证，迭代iters次，计算得分，命中数目
-# regfun指定回归方法，feature指定特征文件，ratio指定标注和未标注的比例，iters指定迭代次数，后面都是各模型自己的参数
-# oneg为1，则训练集中包括onegram，否则不包括。
-def tenfcv(regfun, feature='feature', cho=[], ratio=0.5, alpha=0.5, kernel='rbf', C=1, gamma='auto',
-           criterion='mse', K=5, weights='uniform', N=10, iters=10):
+# 采用二十折交叉验证，迭代iters次，计算P@5，P@10，P@20
+# regfun：回归方法，feature：特征文件，delete：删除的特征，ratio：训练集中标注和未标注的比例，iters：迭代次数
+def tenfcv(regfun, feature='feature', delete=[], ratio=0.5, alpha=0.5, kernel='rbf', C=1, gamma='auto',
+           criterion='mse', K=5, weights='uniform', N=10, iters=1):
     featureDir = '../Ngrams/' + feature + '/'  # 特征所在的目录
     featureSize = 12
 
@@ -139,9 +125,9 @@ def tenfcv(regfun, feature='feature', cho=[], ratio=0.5, alpha=0.5, kernel='rbf'
     if label / unlabel < ratio:
         gate = label / (ratio * unlabel)
 
-    score, P_5, P_10, P_20 = 0.0, 0.0, 0.0, 0.0
+    P_5, P_10, P_20 = 0.0, 0.0, 0.0
     for ite in range(0, iters):
-        scorei, p_5, p_10, p_20 = 0.0, 0.0, 0.0, 0.0
+        p_5, p_10, p_20 = 0.0, 0.0, 0.0
         for vid in range(0, 20):
             # 0~20中的第vid个作为验证集，其余的作为训练集
             X, Y = [], []
@@ -158,7 +144,7 @@ def tenfcv(regfun, feature='feature', cho=[], ratio=0.5, alpha=0.5, kernel='rbf'
                             continue
                         tmpx = []
                         for xi in range(0, featureSize):
-                            if xi in cho:
+                            if xi not in delete:
                                 tmpx.append(line[xi + 2])
                         X.append(tmpx)
                         Y.append(line[1])
@@ -173,10 +159,9 @@ def tenfcv(regfun, feature='feature', cho=[], ratio=0.5, alpha=0.5, kernel='rbf'
                 line = line.strip().split()
                 for i in range(1, featureSize + 2):
                     line[i] = float(line[i])
-                # 去除特征3,4,10维，对应下标4,5,11
                 tmpx = []
                 for xi in range(0, featureSize):
-                    if xi in cho:
+                    if xi not in delete:
                         tmpx.append(line[xi + 2])
                 vX.append(tmpx)
                 vY.append(line[1])
@@ -196,43 +181,94 @@ def tenfcv(regfun, feature='feature', cho=[], ratio=0.5, alpha=0.5, kernel='rbf'
             elif id(regfun) == id(randomForestRegre):
                 reg = randomForestRegre(X, Y, N=N, _criterion=criterion)
             pY = reg.predict(vX)
-            tmpscore, tmp5, tmp10, tmp20 = evaluate(pY, vY)
-            scorei += tmpscore
+            tmp5, tmp10, tmp20 = evaluate(pY, vY)
             p_5 += tmp5
             p_10 += tmp10
             p_20 += tmp20
 
-        score += scorei / 20.0
         P_5 += p_5 / 20.0
         P_10 += p_10 / 20.0
         P_20 += p_20 / 20.0
 
-    score /= float(iters)
     P_5 /= float(iters)
     P_10 /= float(iters)
     P_20 /= float(iters)
-    return score, P_5, P_10, P_20
+    return P_5, P_10, P_20
 
 
 def main():
-    s = ['tfidf', 'len', 'ics', 'ce', 'ide', 'inTitle', 'n', 'lda1', 'lda2', 'df', 'cont', 'ncnt', 'all']
-    for i in range(0, 12):
-        print s[i]
-        cho = [i]
-        # 线性回归
-        curScore, cur5, cur10, cur20 = tenfcv(linearRegre, feature='feature_12cut', cho=cho, ratio=0.0, iters=1)
-        print 'linear', cur5, cur10, cur20
-        """
-        # 岭回归
-        curScore, cur5, cur10, cur20 = tenfcv(ridgeRegre, feature='feature_12cut', delete=delete, ratio=0.0, alpha=8,
-                                              iters=10)
-        print 'ridge', cur5, cur10, cur20
+    feature = 'feature_12cut'
+    delete = [1,3,8]
+    ratio = [0.8]
+    alpha = [1, 2, 4, 8, 16, 32, 64]
+    kernel = 'rbf'
+    C = [1]
+    gama = [1]
+    criterion = 'mse'
+    N = [20, 25, 30, 35, 40]
 
-        # svm回归
-        curScore, cur5, cur10, cur20 = tenfcv(svr, feature='feature_12cut', delete=delete, ratio=0.8, kernel='rbf',
-                                              C=1, gamma=1.0, iters=10)
-        print 'svr', cur5, cur10, cur20
-        """
+    r1, a1, c1, g1, cr1, n1 = 0, 0, 0, 0, 0, 0
+    P_5, P_10, P_20 = 0.0, 0.0, 0.0
+
+    """
+    print '线性回归调参'
+    # 全部12个特征，不使用cut
+    # 最优参数：ratio = 0
+    # 最优结果：P@5: 0.6  P@10: 0.575  P@20: 0.515
+    for r in range(0, len(ratio)):
+        cur5, cur10, cur20 = tenfcv(linearRegre, feature=feature, ratio=ratio[r])
+        print 'ratio:', ratio[r], '\tP@5:', cur5, '\tP@10:', cur10, '\tP@20:', cur20
+        if cur5 > P_5 or (cur5 == P_5 and cur10 > P_10) or (cur5 == P_5 and cur10 == P_10 and cur20 > P_20):
+            P_5 = cur5
+            P_10 = cur10
+            P_20 = cur20
+            r1 = r
+    print '最优参数：ratio:', ratio[r1]
+    print '最优结果：P@5:', P_5, ' P@10:', P_10, ' P@20:', P_20
+    """
+
+    """
+    print '岭回归调参'
+    # 全部12个特征，不使用cut
+    # 最优参数：ratio = 0, alpha = 8
+    # 最优结果：P@5: 0.62  P@10: 0.585  P@20: 0.5225
+    for r in range(0, len(ratio)):
+        for a in range(0, len(alpha)):
+            cur5, cur10, cur20 = tenfcv(ridgeRegre, feature=feature, ratio=ratio[r], alpha=alpha[a], iters=2)
+            print 'ratio:', ratio[r], 'alpha:', alpha[a], '\tP@5:', cur5, '\tP@10:', cur10, '\tP@20:', cur20
+            if cur5 > P_5 or (cur5 == P_5 and cur10 > P_10) or (cur5 == P_5 and cur10 == P_10 and cur20 > P_20):
+                P_5 = cur5
+                P_10 = cur10
+                P_20 = cur20
+                r1 = r
+                a1 = a
+    print '最优参数：ratio:', ratio[r1], 'alpha:', alpha[a1]
+    print '最优结果：P@5:', P_5, ' P@10:', P_10, ' P@20:', P_20
+    """
+
+    print 'svr调参'
+    # 全部12个特征，不使用cut
+    # 最优参数：ratio = 0.4, c = 1, g = 1
+    # 最优结果：P@5: 0.725  P@10: 0.6625  P@20: 0.5925
+    for r in range(0, len(ratio)):
+        for c in range(0, len(C)):
+            for g in range(0, len(gama)):
+                cur5, cur10, cur20 = tenfcv(svr, feature=feature, delete=delete, ratio=ratio[r], kernel=kernel,
+                                            C=C[c], gamma=gama[g], iters=10)
+                print 'ratio:', ratio[r], '\tkernel:', '\tC:', C[c], 'gamma:', gama[g], \
+                    '\tP@5:', cur5, '\tP@10:', cur10, '\tP@20:', cur20
+                if cur5 > P_5 or (cur5 == P_5 and cur10 > P_10) or (
+                        cur5 == P_5 and cur10 == P_10 and cur20 > P_20):
+                    P_5 = cur5
+                    P_10 = cur10
+                    P_20 = cur20
+                    r1 = r
+                    c1 = c
+                    g1 = g
+    print '最优参数：ratio:', ratio[r1], ' C:', C[c1], 'gamma:', gama[g1]
+    print '最优结果：P@5:', P_5, ' P@10:', P_10, ' P@20:', P_20
+
+
 
 if __name__ == '__main__':
     main()

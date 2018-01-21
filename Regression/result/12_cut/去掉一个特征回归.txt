@@ -1,0 +1,64 @@
+Without tfidf
+linear 0.68 0.65 0.5875
+ridge 0.65 0.625 0.565
+svr 0.709 0.664 0.60375
+
+Without len
+linear 0.65 0.65 0.575
+ridge 0.65 0.64 0.57
+svr 0.722 0.6675 0.6045
+
+Without ics
+linear 0.64 0.635 0.585
+ridge 0.68 0.63 0.58
+svr 0.694 0.656 0.6
+
+Without ce
+linear 0.64 0.635 0.595
+ridge 0.69 0.62 0.5775
+svr 0.704 0.674 0.61675
+
+Without ide
+linear 0.6 0.58 0.5425
+ridge 0.61 0.55 0.5275
+svr 0.641 0.623 0.56075
+
+Without inTitle
+linear 0.69 0.63 0.59
+ridge 0.68 0.625 0.575
+svr 0.72 0.666 0.59825
+
+Without n
+linear 0.64 0.63 0.5975
+ridge 0.67 0.625 0.5975
+svr 0.681 0.6425 0.60175
+
+Without lda1
+linear 0.68 0.62 0.6125
+ridge 0.7 0.61 0.605
+svr 0.696 0.6625 0.60875
+
+Without lda2
+linear 0.65 0.645 0.59
+ridge 0.67 0.63 0.58
+svr 0.718 0.688 0.61025
+
+Without df
+linear 0.65 0.655 0.59
+ridge 0.66 0.63 0.5775
+svr 0.681 0.6505 0.599
+
+Without cont
+linear 0.64 0.625 0.575
+ridge 0.63 0.61 0.56
+svr 0.708 0.6655 0.60825
+
+Without ncnt
+linear 0.64 0.64 0.5975
+ridge 0.67 0.635 0.565
+svr 0.696 0.6615 0.60225
+
+all
+linear 0.65 0.635 0.585
+ridge 0.67 0.62 0.5725
+svr 0.707 0.677 0.603

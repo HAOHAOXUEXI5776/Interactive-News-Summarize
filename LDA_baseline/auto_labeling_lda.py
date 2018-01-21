@@ -27,13 +27,13 @@ news_name = ['德国大选', '俄罗斯世界杯', '功守道', '九寨沟7.0级
              '绝地求生 吃鸡', '英国脱欧', '萨德系统 中韩', '雄安新区', '榆林产妇坠楼']
 
 news_dir = '../Ngrams/Processed/'
-label_dir = '../Ngrams/feature/'
+label_dir = '../Ngrams/feature_12cut/'
 out_dir = './auto_label/'
 K = 10          # lda主题数
 iters = 100     # lda迭代次数
 window = 0      # pmi计算窗口大小的一半，设为0是为了突出2-gram，3-gram
 miu = 0.5       # 计算score时的参数，值越大越强调不同topic之间选择标签的差异
-repeat_num = 5  # 整个算法的重复次数，为了消除lda的随机不稳定性
+repeat_num = 10 # 整个算法的重复次数，为了消除lda的随机不稳定性
 
 
 # 读入分词后的文档集合，得到word-idx映射关系，通过lda得到topic-word分布

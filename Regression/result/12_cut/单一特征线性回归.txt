@@ -1,0 +1,24 @@
+tfidf
+linear 0.58 0.505 0.4525
+len
+linear 0.51 0.48 0.4325
+ics
+linear 0.24 0.265 0.2775
+ce
+linear 0.34 0.35 0.3575
+ide
+linear 0.4 0.445 0.465
+inTitle
+linear 0.54 0.5 0.4975
+n
+linear 0.39 0.44 0.3925
+lda1
+linear 0.48 0.48 0.4575
+lda2
+linear 0.34 0.36 0.305
+df
+linear 0.33 0.36 0.3625
+cont
+linear 0.47 0.46 0.39
+ncnt
+linear 0.51 0.47 0.425
