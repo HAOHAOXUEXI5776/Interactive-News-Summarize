@@ -5,7 +5,7 @@ import os
 
 label_dir = './label/'
 block_dir = './block/'
-out_dir = './assign/contain_block/'
+out_dir = './assign/little_block/'
 
 
 # 句子类

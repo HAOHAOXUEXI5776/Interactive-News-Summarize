@@ -3,7 +3,7 @@
 # 使用TextTiling算法将原新闻分段，分为以下三步
 # 1.分句与分词。
 # 2.两句话中间称作一个gap，为每个gap计算两侧的文本的相似度，计算完成后将相似度与周围gap的相似度平滑
-# 3.根据每个gap的相似度以及周围的gap的相似度，计算该gap的depth score，最后选取depth score大于s - σ的gap作为分割点
+# 3.根据每个gap的相似度以及周围的gap的相似度，计算该gap的depth score，最后选取depth score大于s - 3σ的gap作为分割点
 
 from math import sqrt, pow
 from pyltp import Segmentor
@@ -12,8 +12,8 @@ import matplotlib.pyplot as plt
 import gensim
 
 qin = 0        # 改成0是刘辉的路径，否则是秦文涛的路径
-window = 50    # 考虑一个gap前后50个词（包括标点，停用词），如果gap前后不足50词，不作为候选gap
-sim_kind = 1   # 相似度计算方法，0表示使用tf，1表示使用word2vec平均
+window = 25    # 考虑一个gap前后50个词（包括标点，停用词），如果gap前后不足50词，不作为候选gap
+sim_kind = 0   # 相似度计算方法，0表示使用tf，1表示使用word2vec平均
 smooth_window = 2  # 对gap的similarity平滑时，只考虑左右相邻点
 smooth_depth = 0   # 平滑深度，使用平滑策略导致块过大，效果也不理想，所有当前没有使用
 
@@ -95,7 +95,7 @@ def mean_vec(vec_list, vec_size):
 
 
 # TextTiling算法
-def text_titling(news, news_id, sen_list, f_out):
+def text_titling(sen_list, f_out):
 
     # 得到词典，词-idx映射关系，文章的词序列
     word_list = []
@@ -216,8 +216,8 @@ def text_titling(news, news_id, sen_list, f_out):
         f_out.write(str(block_end - block_start) + '\n')
         for i in range(block_start, block_end):
             sen = sen_list[i]
-            f_out.write(sen.news_idx + ' ' + sen.sen_idx + ' ' + sen.para_idx + ' ' + sen.para_off + ' ' + sen.para_size +
-                     '\n')
+            f_out.write(sen.news_idx + ' ' + sen.sen_idx + ' ' + sen.para_idx + ' ' + sen.para_off + ' ' +
+                        sen.para_size + '\n')
             f_out.write(sen.content + '\n')
         block_start = block_end
 
@@ -237,23 +237,29 @@ def text_titling(news, news_id, sen_list, f_out):
             plt.plot(x, y)
         plt.savefig('/Users/liuhui/Desktop/' + news + '_' + str(news_id))
     """
+    return len(boundary)
 
 
 def main():
+    sum_sen_num = 0.0
+    sum_blk_num = 0.0
     for news in news_name:
-        print news
         cur_dir = out_dir + news + '/'
         if not os.path.exists(cur_dir):
             os.mkdir(cur_dir)
         cur_file = cur_dir + 'block.txt'
         f_out = open(cur_file, 'w')
         f_in = open('./sentence/' + news + '/sentence.txt', 'r')
-        sen_list = []  # 用来保存当前新闻的所有句子
+        sen_num = 0.0       # 关于该事件的所有新闻的总句数
+        block_num = 0.0     # 关于该事件的所有新闻的总块数
+        sen_list = []  # 用来保存当前一篇新闻的所有句子
         cur_news_id = 1  # 当前新闻的编号
         while True:
             info = f_in.readline()
             if len(info) < 2:
-                text_titling(news, cur_news_id, sen_list, f_out)
+                cur_blk_num = text_titling(sen_list, f_out)
+                sen_num += len(sen_list)
+                block_num += cur_blk_num
                 break
             info = info.strip().split()
             sen = f_in.readline().strip()
@@ -261,11 +267,17 @@ def main():
             if int(info[0]) == cur_news_id:
                 sen_list.append(cur_sen)
             else:
-                text_titling(news, cur_news_id, sen_list, f_out)
+                cur_blk_num = text_titling(sen_list, f_out)
+                sen_num += len(sen_list)
+                block_num += cur_blk_num
                 cur_news_id += 1
                 sen_list = [cur_sen]
         f_in.close()
         f_out.close()
+        print news, round(sen_num/block_num, 3)
+        sum_sen_num += sen_num
+        sum_blk_num += block_num
+    print '总计', round(sum_sen_num/sum_blk_num, 3)
 
 
 if __name__ == '__main__':
