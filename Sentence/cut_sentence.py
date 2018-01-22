@@ -3,6 +3,7 @@
 # 将原新闻切分成句子，保存到文件中，切分原则：
 # 新闻标题保存到另外的title文件中，
 # 新闻的每一行当作一段，段内以句号为边界切分句子，如果句号出现在引号之中，则不作为边界
+# 新增：如果一段最后一句中没有句号，叹号，问号，引号，则删去（有可能是新闻作者信息）
 
 import re
 import os
@@ -70,7 +71,10 @@ for news in news_name:
             sentence_list = []
             para_off = 0
             for sen in para:
-                if len(sen) < 5:
+                if '。'.decode('utf-8') not in sen and '？'.decode('utf-8') not in sen and \
+                        '！'.decode('utf-8') not in sen and '"'.decode('utf-8') not in sen and \
+                        '“'.decode('utf-8') not in sen and '”'.decode('utf-8') not in sen and \
+                        '?'.decode('utf-8') not in sen and '!'.decode('utf-8') not in sen:
                     continue
                 sen_idx += 1
                 para_off += 1
