@@ -170,7 +170,7 @@ def blockscore(blockDir, news, label, labelv):
 
     return blocks, score, index
 
-blockDir = '../Sentence/assign/contain_block/'
+blockDir = '../Sentence/assign/little_block/'
 labelDir = '../Sentence/label/'
 outDir = 'blockscore/'
 
