@@ -59,6 +59,7 @@ def cos_similarity(vec1, vec2):
     result /= sqrt(vec1_size * vec2_size)
     return result
 
+'''
 #根据块的前后关系behind得到整体的排序
 #首先根据blocks[0]，将其余的blocks划分到它的两侧，对两侧递归处理
 #排序结果置于li中
@@ -82,7 +83,7 @@ def recursort(behind, li, i, index, offset):
         recursort(behind, li, r[0], r, li[i]+1)
     if len(l) > 0:
         recursort(behind, li, l[0], l, offset)
-
+'''
 
 news_name = ['hpv疫苗', 'iPhone X', '乌镇互联网大会', '九寨沟7.0级地震', '俄罗斯世界杯',
              '双十一购物节', '德国大选', '功守道', '战狼2', '权力的游戏', '李晨求婚范冰冰', '江歌刘鑫',
@@ -96,6 +97,7 @@ for news in news_name:
     if not os.path.exists(unicode(path, 'utf8')):
         os.mkdir(unicode(path, 'utf8'))
 
+    '''
     #读取所有的新闻
     new = []   #记录所有新闻对应的句子
     for i in range(0, 100):
@@ -125,6 +127,7 @@ for news in news_name:
         if len(new[99-i]) != 0:
             newscnt = 100-i
             break
+    '''
 
     #读入所有的标题,计算其向量置于title中
     title = []
@@ -137,8 +140,8 @@ for news in news_name:
                 word_vec_list.append(model[word])
         title.append(mean_vec(word_vec_list))
     f.close()
-    print newscnt, len(title)
-    assert newscnt == len(title)
+
+    print '标题数：', len(title)
 
     #读入所有标签
     f = open(unicode('../Sentence/label/'+news+'/label.txt', 'utf8'), 'r')
@@ -178,7 +181,7 @@ for news in news_name:
             tolsent += len(blocks[endblock])
             endblock += 1
         assert endblock != 0
-        #按照标题的相似度向将分为几类
+        #按照标题的相似度将第0~endblock-1块分为几类
         cluster = []
         use = [0 for i in range(0, endblock)]
         for i in range(0, endblock):
@@ -189,7 +192,7 @@ for news in news_name:
             use[i] = 1
             for j in range(i+1, endblock):
                 newid_j = blocks[j][0].newsid - 1
-                if cos_similarity(title[newid_i], title[newid_j]) > 0.6:
+                if use[j] == 0 and cos_similarity(title[newid_i], title[newid_j]) > 0.6:
                     tcluster.append(blocks[j])
                     use[j] = 1
             cluster.append(tcluster)
