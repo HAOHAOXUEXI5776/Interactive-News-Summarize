@@ -119,6 +119,27 @@ for news in news_name:
         new[nums[0]-1].append(sent)
     f.close()
 
+    #统计有多少篇新闻
+    newscnt = 0
+    for i in range(0, 100):
+        if len(new[99-i]) != 0:
+            newscnt = 100-i
+            break
+
+    #读入所有的标题,计算其向量置于title中
+    title = []
+    f = open(unicode('../Sentence/sentence/'+news+'/title.txt','utf8'), 'r')
+    for line in f:
+        words = segmentor.segment(line.strip())
+        word_vec_list = []
+        for word in words:
+            if word not in stoplist and word in model:
+                word_vec_list.append(model[word])
+        title.append(mean_vec(word_vec_list))
+    f.close()
+    print newscnt, len(title)
+    assert newscnt == len(title)
+
     #读入所有标签
     f = open(unicode('../Sentence/label/'+news+'/label.txt', 'utf8'), 'r')
     labels = [line.strip().replace('+', '') for line in f]
@@ -151,6 +172,177 @@ for news in news_name:
         f.close()
         blockcnt = len(blocks)
 
+        #选择blocks中的若干块，使得其总句子数在大于10的情况下尽可能小
+        tolsent, endblock = 0, 0
+        while tolsent < 10 and endblock < blockcnt:
+            tolsent += len(blocks[endblock])
+            endblock += 1
+        assert endblock != 0
+        #按照标题的相似度向将分为几类
+        cluster = []
+        use = [0 for i in range(0, endblock)]
+        for i in range(0, endblock):
+            if use[i] == 1:
+                continue
+            newid_i = blocks[i][0].newsid - 1
+            tcluster = [blocks[i]]
+            use[i] = 1
+            for j in range(i+1, endblock):
+                newid_j = blocks[j][0].newsid - 1
+                if cos_similarity(title[newid_i], title[newid_j]) > 0.6:
+                    tcluster.append(blocks[j])
+                    use[j] = 1
+            cluster.append(tcluster)
+        f = open(unicode(outDir+news+'/'+label+'.txt', 'utf8'), 'w')
+        #每个类进行排序
+        for tcluster in cluster:
+            l = len(tcluster)
+            sort = [i for i in range(0, l)]
+            #块在全文越靠前的位置，在段越靠前的位置，越要排到前头
+            #若位置因素影响不大，则考虑时间因素，新闻标号越小，发生的时间越晚，越往后排
+            for i in range(0, l):
+                for j in range(i+1, l):
+                    senti, sentj = tcluster[sort[i]][0], tcluster[sort[j]][0]
+                    if senti.globalid > sentj.globalid or \
+                       (senti.globalid == sentj.globalid and senti.localid > sentj.localid) or \
+                       (senti.globalid == sentj.globalid and senti.localid == sentj.localid and senti.newsid < sentj.newsid):
+                        sort[i], sort[j] = sort[j], sort[i]
+            for i in range(0, l):
+                for sent in tcluster[sort[i]]:
+                    f.write(sent.content)
+                f.write('\n')
+        f.close()
+
+
+        '''
+        cadisent = []
+        #选取blocks中的前10句子作为候选
+        tolsent, endblock = 0, 0
+        while tolsent != 10 and endblock < blockcnt:
+            curblock = blocks[endblock]
+            if tolsent + len(curblock) >= 10:
+                left = 10 - tolsent
+                for i in range(0, left):
+                    cadisent.append(curblock[i])
+                    tolsent += 1
+            else:
+                for sent in curblock:
+                    cadisent.append(sent)
+                    tolsent += 1
+            endblock += 1
+
+        #计算候选句子两两间的前后关系
+        #对每个句子，计算其他的句子是放在它的前头还是后头
+        #behind[i][j] = 1（或behind[j][i] = 0）(i!=j)，则说明i应放在j之后
+        behind = []
+        for i in range(0, tolsent):
+            tmp = ['#' for i in range(0, tolsent)]
+            behind.append(tmp)
+        for i in range(0, tolsent):
+            for j in range(i+1, tolsent):
+                print i, j
+                senti, sentj = cadisent[i], cadisent[j]
+                if senti.newsid == sentj.newsid:
+                    #二者在同一篇新闻内，则按照其原顺序排序
+                    if senti.globalid < sentj.globalid:
+                        behind[i][j], behind[j][i] = 0, 1
+                    else:
+                        behind[i][j], behind[j][i] = 1, 0
+                else:
+                    #在senti的新闻内，sentj与senti前面和后面的最大相似度
+                    senti_front, senti_behind = 0.0, 0.0
+                    nidi, sidi = senti.newsid, senti.globalid
+                    for sent in new[nidi]:
+                        if sent.globalid < sidi:
+                            senti_front = max(senti_front, cos_similarity(sent.vec, sentj.vec))
+                        elif sent.globalid > sidi:
+                            senti_behind = max(senti_behind, cos_similarity(sent.vec, sentj.vec))
+
+                    #在sentj的新闻内，senti与sentj前面和后面的最大相似度
+                    sentj_front, sentj_behind = 0.0, 0.0
+                    nidj, sidj = sentj.newsid, sentj.globalid
+                    for sent in new[nidj]:
+                        if sent.globalid < sidj:
+                            sentj_front = max(sentj_front, cos_similarity(sent.vec, senti.vec))
+                        elif sent.globalid > sidj:
+                            sentj_behind = max(sentj_behind, cos_similarity(sent.vec, senti.vec))
+
+                    #在除了senti和sentj的新闻k内，找到与senti和sentj的最大相似度的句子
+                    behindij = -1
+                    max_simi = 0.0
+                    for nid in range(0, newscnt):
+                        if nid == nidi or nid == nidj:
+                            continue
+                        simi_i, simi_j = 0.0, 0.0
+                        sent_i, sent_j = None, None
+                        for sent in new[nid]:
+                            tmp_simii = cos_similarity(sent.vec, senti.vec)
+                            tmp_simij = cos_similarity(sent.vec, sentj.vec)
+                            if tmp_simii > simi_i:
+                                simi_i = tmp_simii
+                                sent_i = sent
+                            if tmp_simij > simi_j:
+                                simi_j = tmp_simij
+                                sent_j = sent
+                        if simi_i+simi_j > max_simi:
+                            max_simi = simi_i+simi_j
+                            if sent_i.globalid > sent_j.globalid:
+                                behindij = 1
+                            elif sent_i.globalid < sent_j.globalid:
+                                behindij = 0
+
+                    tmplist = [senti_front, senti_behind, sentj_front, sentj_behind, max_simi/2.0]
+
+                    #基数排序，看哪个相似度最大
+                    idx = [ki for ki in range(0, 5)]
+                    for ki in range(0, 5):
+                        for kj in range(ki+1, 5):
+                            if tmplist[idx[ki]] < tmplist[idx[kj]]:
+                                idx[ki], idx[kj] = idx[kj], idx[ki]
+
+                    if behindij == -1 and idx[0] != 4:
+                        if idx[0] == 0 or idx[0] == 3:
+                            behind[i][j], behind[j][i] = 1, 0
+                        if idx[0] == 1 or idx[0] == 2:
+                            behind[i][j], behind[j][i] = 0, 1
+                    elif behindij == -1 and idx[0] == 4:
+                        if idx[1] == 0 or idx[1] == 3:
+                            behind[i][j], behind[j][i] = 1, 0
+                        if idx[1] == 1 or idx[1] == 2:
+                            behind[i][j], behind[j][i] = 0, 1
+                    elif behindij != -1:
+                        if idx[0] == 0 or idx[0] == 3 or (idx[0] == 4 and behindij == 1):
+                            behind[i][j], behind[j][i] = 1, 0
+                        if idx[0] == 1 or idx[0] == 2 or (idx[0] == 4 and behindij == 0):
+                            behind[i][j], behind[j][i] = 0, 1
+
+                    print tmplist, behindij, behind[i][j]
+
+        sort_index = [-1 for i in range(0, tolsent)]
+        index = [i for i in range(0, tolsent)]
+        recursort(behind, sort_index, 0, index, 0)
+
+        f = open(unicode(outDir+news+'/'+label+'.txt', 'utf8'), 'w')
+        for sent in cadisent:
+            f.write(sent.content+'\n')
+        for i in range(0, tolsent):
+            for j in range(0, tolsent):
+                f.write(str(behind[i][j])+'\t')
+            f.write('\n')
+        f.write('-----------------------------------------------\n')
+        for i in range(0, tolsent):
+            f.write(str(sort_index[i])+' ')
+        f.write('\n')
+
+        for i in range(0, tolsent):
+            for j in range(0, tolsent):
+                if sort_index[j] == i:
+                    f.write(cadisent[j].content+'\n')
+                    break
+        f.close()
+        '''
+
+        """
         #选择blocks中的若干块，使得其总句子数在大于10的情况下尽可能小
         tolsent, endblock = 0, 0
         while tolsent < 10 and endblock < blockcnt:
@@ -201,4 +393,5 @@ for news in news_name:
                 f.write(sent.content+'\n')
             f.write('\n')
         f.close()
+        """
 
