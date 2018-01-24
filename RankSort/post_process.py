@@ -8,7 +8,7 @@ from pyltp import Segmentor
 import re
 from math import sqrt
 
-qin = 0  # 改成0是刘辉的路径，否则是秦文涛的路径
+qin = 1  # 改成0是刘辉的路径，否则是秦文涛的路径
 segmentor = Segmentor()
 if qin == 1:
     segmentor.load('D:/coding/Python2.7/ltp_data_v3.4.0/cws.model')
@@ -119,7 +119,7 @@ def check_repeat(blocks, blk):
 def main():
     for news in news_name:
         labels = []
-        f_label = open(label_dir + news + '/label.txt', 'r')
+        f_label = open(unicode(label_dir + news + '/label.txt','utf8'), 'r')
         for label in f_label:
             label = label.strip().replace('+', '')
             labels.append(label)
@@ -127,11 +127,11 @@ def main():
                 break
         f_label.close()
 
-        f_sum = open(out_dir + news + '.txt', 'w')
+        f_sum = open(unicode(out_dir + news + '.txt', 'utf8'), 'w')
 
         blocks = []     # 记录已经选择的块
         for label in labels:
-            f_label_sum = open(sum_dir + news + '/' + label + '.txt')
+            f_label_sum = open(unicode(sum_dir + news + '/' + label + '.txt', 'utf8'), 'r')
             f_sum.write('【' + label + '】\n')    # 相当于小标题，可以去掉
             for blk in f_label_sum:
                 blk = process(blk)
