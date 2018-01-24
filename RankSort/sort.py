@@ -90,7 +90,9 @@ news_name = ['hpv疫苗', 'iPhone X', '乌镇互联网大会', '九寨沟7.0级�
              '王宝强马蓉离婚案', '百度无人驾驶汽车', '红黄蓝幼儿园', '绝地求生 吃鸡', '英国脱欧',
              '萨德系统 中韩', '雄安新区', '榆林产妇坠楼']
 
-outDir = 'summary/'
+# news_name = ['hpv疫苗']
+
+outDir = 'topic_sum/'
 for news in news_name:
     print news
     path = outDir+news
@@ -174,14 +176,45 @@ for news in news_name:
             blocks.append(block)
         f.close()
         blockcnt = len(blocks)
-
-        #选择blocks中的若干块，使得其总句子数在大于10的情况下尽可能小
-        tolsent, endblock = 0, 0
-        while tolsent < 10 and endblock < blockcnt:
-            tolsent += len(blocks[endblock])
-            endblock += 1
+        blocklen = []
+        for block in blocks:
+            s = 0
+            for sent in block:
+                s += len(sent.content)/3.0
+            blocklen.append(s)
+        #选择blocks中的若干块，使得其字数在于530~580之间，如果找不到，则放松范围
+        tol, endblock = 0, 0
+        while tol < 550 and endblock < blockcnt:
+            ttol = tol + blocklen[endblock]
+            if ttol < 530:
+                tol = ttol
+                endblock += 1
+            elif ttol >= 530 and ttol <= 580:
+                tol = ttol
+                endblock += 1
+                break
+            elif ttol > 580:
+                #说明之前的字数少于530，加了这一个就超了580
+                l, r = 530 - tol, 580 - tol
+                nice = -1
+                for i in range(endblock+1, blockcnt):
+                    if blocklen[i] >= l and blocklen[i] <= r:
+                        nice = i
+                        break
+                if nice == -1:
+                    #往后找不到满足的，则找下一个
+                    tol += blocklen[endblock]
+                    endblock += 1
+                    break
+                else:
+                    #将第nice个作为下一个
+                    tol += blocklen[nice]
+                    blocks[nice], blocks[endblock] = blocks[endblock], blocks[nice]
+                    endblock += 1
+                    break
         assert endblock != 0
         #按照标题的相似度将第0~endblock-1块分为几类
+        print 'tol=', tol
         cluster = []
         use = [0 for i in range(0, endblock)]
         for i in range(0, endblock):
