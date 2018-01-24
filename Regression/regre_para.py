@@ -198,12 +198,12 @@ def tenfcv(regfun, feature='feature', delete=[], ratio=0.5, alpha=0.5, kernel='r
 
 def main():
     feature = 'feature_12cut'
-    delete = [1,3,8]
-    ratio = [0.8]
-    alpha = [1, 2, 4, 8, 16, 32, 64]
+    delete = [3, 8]
+    ratio = [0]
+    alpha = [1,2,4,8,16,32]
     kernel = 'rbf'
-    C = [1]
-    gama = [1]
+    C = [4]
+    gama = [1, 2]
     criterion = 'mse'
     N = [20, 25, 30, 35, 40]
 
@@ -214,9 +214,12 @@ def main():
     print '线性回归调参'
     # 全部12个特征，不使用cut
     # 最优参数：ratio = 0
-    # 最优结果：P@5: 0.6  P@10: 0.575  P@20: 0.515
+    # 全部12个特征，用cut
+    # 最优参数：ratio = 0.6
+    # 10个特征，用cut，去掉ce和lda2
+    # 最优参数：ratio = 0.8
     for r in range(0, len(ratio)):
-        cur5, cur10, cur20 = tenfcv(linearRegre, feature=feature, ratio=ratio[r])
+        cur5, cur10, cur20 = tenfcv(linearRegre, feature=feature, delete=delete, ratio=ratio[r], iters=1)
         print 'ratio:', ratio[r], '\tP@5:', cur5, '\tP@10:', cur10, '\tP@20:', cur20
         if cur5 > P_5 or (cur5 == P_5 and cur10 > P_10) or (cur5 == P_5 and cur10 == P_10 and cur20 > P_20):
             P_5 = cur5
@@ -227,14 +230,17 @@ def main():
     print '最优结果：P@5:', P_5, ' P@10:', P_10, ' P@20:', P_20
     """
 
-    """
+
     print '岭回归调参'
     # 全部12个特征，不使用cut
     # 最优参数：ratio = 0, alpha = 8
-    # 最优结果：P@5: 0.62  P@10: 0.585  P@20: 0.5225
+    # 全部12个特征，使用cut
+    # 最优参数：ratio = 0, alpha = 16
+    # 10个特征，使用cut，去掉ce和lda2
+    # 最优参数：ratio = 0，alpha = 16
     for r in range(0, len(ratio)):
         for a in range(0, len(alpha)):
-            cur5, cur10, cur20 = tenfcv(ridgeRegre, feature=feature, ratio=ratio[r], alpha=alpha[a], iters=2)
+            cur5, cur10, cur20 = tenfcv(ridgeRegre, feature=feature, delete=delete, ratio=ratio[r], alpha=alpha[a], iters=10)
             print 'ratio:', ratio[r], 'alpha:', alpha[a], '\tP@5:', cur5, '\tP@10:', cur10, '\tP@20:', cur20
             if cur5 > P_5 or (cur5 == P_5 and cur10 > P_10) or (cur5 == P_5 and cur10 == P_10 and cur20 > P_20):
                 P_5 = cur5
@@ -244,12 +250,16 @@ def main():
                 a1 = a
     print '最优参数：ratio:', ratio[r1], 'alpha:', alpha[a1]
     print '最优结果：P@5:', P_5, ' P@10:', P_10, ' P@20:', P_20
-    """
 
+
+    """
     print 'svr调参'
     # 全部12个特征，不使用cut
     # 最优参数：ratio = 0.4, c = 1, g = 1
-    # 最优结果：P@5: 0.725  P@10: 0.6625  P@20: 0.5925
+    # 全部12个特征，用cut
+    # 最优参数：ratio = 0.8, c = 1, g = 1
+    # 10个特征，用cut，去掉ce和lda2
+    # 最优参数：ratio = 0.8, c = 4, g = 1
     for r in range(0, len(ratio)):
         for c in range(0, len(C)):
             for g in range(0, len(gama)):
@@ -267,7 +277,7 @@ def main():
                     g1 = g
     print '最优参数：ratio:', ratio[r1], ' C:', C[c1], 'gamma:', gama[g1]
     print '最优结果：P@5:', P_5, ' P@10:', P_10, ' P@20:', P_20
-
+    """
 
 
 if __name__ == '__main__':
