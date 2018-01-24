@@ -1,0 +1,3 @@
+之前我们曾报道过，越南一家名叫Bkav的安全公司利用3D打印出的人脸面具，骗过FaceID成功解锁iPhoneX，当时不少网友认为，毕竟该公司制作的人脸面具不是人人都能轻松完成的，所以要想解锁FaceID也并非易事，。
+然而，国外知名YouTuberWolfieRaps却用实际行动证明，iPhoneX的FaceID或许真的是人人都可破解，视频中，和其他测试者一样，WolfieRaps一开始了也尝试了许多方法试图破解FaceID，比如让朋友扮演各种鬼脸、打印自己照片等，iPhoneX都完美通过测试，。
+不过在镜子面前，iPhoneX似乎也束手无策了，WolfieRaps轻松利用镜子中的自己解锁了iPhoneX，一开始，WolfieRaps利用白色的石膏面具尝试解锁iPhoneX，结果尝试失败，接着，WolfieRaps又为石膏面具涂上颜色，让其看起来更像其本人，视频的最后，WolfieRaps表示要将这一测试结果告诉苹果，不知苹果届时会对此作何解释，。
