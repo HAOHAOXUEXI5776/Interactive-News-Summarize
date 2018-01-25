@@ -29,7 +29,7 @@ label_dir = '../Sentence/label/'
 sum_dir = './topic_sum/'
 out_dir = './sum/'
 label_num = 4  # 选取前几个标签构成综述
-sim_threshold = 0.97  # 相似度大于此值的块不再被选入
+sim_threshold = 0.93  # 相似度大于此值的块不再被选入
 least = 200  # 标签下的最小长度
 
 news_name = ['hpv疫苗', 'iPhone X', '乌镇互联网大会', '九寨沟7.0级地震', '俄罗斯世界杯',
@@ -128,18 +128,20 @@ def main():
 
         f_sum = open(unicode(out_dir + news + '.txt', 'utf8'), 'w')
         label_cnt = 0
+        all_blocks = []
         for label in labels:
             f_label_sum = open(unicode(sum_dir + news + '/' + label + '.txt', 'utf8'), 'r')
             blocks = []
             for blk in f_label_sum:
                 blk = process(blk)
-                if check_repeat(blocks, blk):
+                if check_repeat(all_blocks + blocks, blk):
                     blocks.append(blk)
             f_label_sum.close()
             cur_len = 0
             for blk in blocks:
                 cur_len += len(blk.decode('utf-8'))
             if cur_len >= least:
+                all_blocks += blocks
                 f_sum.write('【' + label + '】\n')
                 for blk in blocks:
                     f_sum.write(blk)
