@@ -1,7 +1,7 @@
 # coding:utf-8
 
 # 对生成的summary进行后期处理，并选择好的标签生成最后的综述
-# 后期处理包括删除块之前的报道信息，块一开始的连词
+# 后期处理包括删除块开头的报道信息，块一开始的连词，如果一个块在不同label下都有出现的话只选一次
 
 import gensim
 from pyltp import Segmentor
@@ -29,7 +29,7 @@ label_dir = '../Sentence/label/'
 sum_dir = './topic_sum/'
 out_dir = './sum/'
 label_num = 4  # 选取前几个标签构成综述
-sim_threshold = 0.93  # 相似度大于此值的块不再被选入
+sim_threshold = 0.95  # 相似度大于此值的块不再被选入
 least = 200  # 标签下的最小长度
 
 news_name = ['hpv疫苗', 'iPhone X', '乌镇互联网大会', '九寨沟7.0级地震', '俄罗斯世界杯',
