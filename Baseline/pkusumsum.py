@@ -6,7 +6,7 @@
 import os
 
 pkusumsum_path = '/Users/liuhui/Desktop/PKUSUMSUM/PKUSUMSUM.jar'  # jar包位置
-length = 2500
+length = 1000
 methods = ['Coverage', 'Lead', 'Centroid', 'ILP', 'LexPageRank', 'TextRank', 'Submodular', 'ClusterCMRW']
 chosen = [0, 1, 2, 4, 5, 6, 7]   # 选择的方法，ILP暂时没使用
 in_dir = './news/'
