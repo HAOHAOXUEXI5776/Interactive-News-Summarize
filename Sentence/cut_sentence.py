@@ -73,8 +73,7 @@ for news in news_name:
             for sen in para:
                 if '。'.decode('utf-8') not in sen and '？'.decode('utf-8') not in sen and \
                         '！'.decode('utf-8') not in sen and '"'.decode('utf-8') not in sen and \
-                        '“'.decode('utf-8') not in sen and '”'.decode('utf-8') not in sen and \
-                        '?'.decode('utf-8') not in sen and '!'.decode('utf-8') not in sen:
+                        '“'.decode('utf-8') not in sen and '”'.decode('utf-8') not in sen:
                     continue
                 sen_idx += 1
                 para_off += 1

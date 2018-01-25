@@ -1,12 +1,12 @@
-#coding:utf-8
+# coding:utf-8
 
 import gensim
 from pyltp import Segmentor
-from numpy import * #用于矩阵运算
-import copy         #用于深复制
+from numpy import *  # 用于矩阵运算
+import copy  # 用于深复制
 import os
 
-qin = 1 #改成0是刘辉的路径，否则是秦文涛的路径
+qin = 0  # 改成0是刘辉的路径，否则是秦文涛的路径
 # 加载分词模型
 segmentor = Segmentor()
 if qin == 1:
@@ -24,15 +24,17 @@ for line in f:
     stoplist[word] = 1
 f.close()
 
+
 class Sent:
     def __init__(self, _newsid, _globalid, _paraid, _localid, _sentnum, _content, _vec):
-        self.newsid = _newsid        #该句所属新闻编号
-        self.globalid = _globalid    #该句在该篇新闻的第几句
-        self.paraid = _paraid        #该句在该篇新闻的第几段
-        self.localid = _localid      #该句在所属段的第几句
-        self.sentnum = _sentnum       #该句所在段有多少句
+        self.newsid = _newsid  # 该句所属新闻编号
+        self.globalid = _globalid  # 该句在该篇新闻的第几句
+        self.paraid = _paraid  # 该句在该篇新闻的第几段
+        self.localid = _localid  # 该句在所属段的第几句
+        self.sentnum = _sentnum  # 该句所在段有多少句
         self.content = _content
         self.vec = _vec
+
 
 # 计算几个向量的平均向量
 def mean_vec(vec_list):
@@ -45,6 +47,7 @@ def mean_vec(vec_list):
     for k in range(0, len(result)):
         result[k] /= len(vec_list)
     return result
+
 
 # 计算两个向量的余弦相似度
 def cos_similarity(vec1, vec2):
@@ -61,30 +64,22 @@ def cos_similarity(vec1, vec2):
     return result
 
 
-#计算两个块之间的相似度：取块间句子的平均相似度
+# 计算两个块之间的相似度：取块间句子的最大相似度
 def block_simi(block1, block2):
-    vec1, vec2 = [], []
-    for sent in block1:
-        vec1.append(sent.vec)
-    for sent in block2:
-        vec2.append(sent.vec)
-    return cos_similarity(mean_vec(vec1), mean_vec(vec2))
-    #最大相似度
-    # max_simi = 0.0
-    # for sent1 in block1:
-    #     for sent2 in block2:
-    #         max_simi = max(max_simi, cos_similarity(sent1.vec, sent2.vec))
-    # return max_simi
+    max_simi = 0.0
+    for sent1 in block1:
+        for sent2 in block2:
+            max_simi = max(max_simi, cos_similarity(sent1.vec, sent2.vec))
+    return max_simi
 
 
-#返回news下label对应的块，以及它们的mmr得分
+# 返回news下label对应的块，以及它们的mmr得分
 def blockscore(blockDir, news, label, labelv):
-
-    #得到该标签下所有块
-    f = open(unicode(blockDir+news+'/'+label+'.txt','utf8'), 'r')
+    # 得到该标签下所有块
+    f = open(unicode(blockDir + news + '/' + label + '.txt', 'utf8'), 'r')
     blocks = []
     while True:
-        n = f.readline() #第一行记录了下面几个句子是一个块
+        n = f.readline()  # 第一行记录了下面几个句子是一个块
         if len(n) == 0:
             break
         block = []
@@ -99,64 +94,64 @@ def blockscore(blockDir, news, label, labelv):
             for word in words:
                 if word not in stoplist and word in model:
                     word_vec_list.append(model[word])
-            sent = Sent(nums[0],nums[1],nums[2],nums[3],nums[4],content,mean_vec(word_vec_list))
+            sent = Sent(nums[0], nums[1], nums[2], nums[3], nums[4], content, mean_vec(word_vec_list))
             block.append(sent)
         blocks.append(block)
     f.close()
 
     blockcnt = len(blocks)
 
-    #pageRank部分
+    # pageRank部分
 
     unipai = [0.0 for i in range(0, blockcnt)]
     for i in range(0, blockcnt):
-        #取块中句子和标签相似度最大的为块与标签的相似度
+        # 取块中句子和标签相似度最大的为块与标签的相似度
         max_simi = 0.0
         for sent in blocks[i]:
             max_simi = max(max_simi, cos_similarity(labelv, sent.vec))
         unipai[i] = max_simi
-    #对unipai归一化
+    # 对unipai归一化
     sumi = sum(unipai)
     if sumi == 0.0:
-        unipai = [1.0/blockcnt for i in range(0, blockcnt)]
+        unipai = [1.0 / blockcnt for i in range(0, blockcnt)]
     else:
-        unipai = [t/sumi for t in unipai]
-    unipai = mat(unipai) #1*blockcnt维矩阵
-    pai = copy.deepcopy(unipai) #每个块的初始得分
+        unipai = [t / sumi for t in unipai]
+    unipai = mat(unipai)  # 1*blockcnt维矩阵
+    pai = copy.deepcopy(unipai)  # 每个块的初始得分
 
-    #根据相似度，计算初始的转移概率矩阵p0
+    # 根据相似度，计算初始的转移概率矩阵p0
     p0 = []
     for i in range(0, blockcnt):
         tmp = [0.0 for i in range(0, blockcnt)]
         p0.append(tmp)
     for i in range(0, blockcnt):
-        for j in range(i+1, blockcnt):
+        for j in range(i + 1, blockcnt):
             simi = block_simi(blocks[i], blocks[j])
             p0[i][j] = p0[j][i] = simi
 
-    #对转移概率归一化
+    # 对转移概率归一化
     for i in range(0, blockcnt):
         sumi = sum(p0[i])
         if sumi != 0.0:
-            p0[i] = [p0[i][j]/sumi for j in range(0, blockcnt)]
-    p0 = mat(p0) #blockcnt*blockcnt维矩阵
+            p0[i] = [p0[i][j] / sumi for j in range(0, blockcnt)]
+    p0 = mat(p0)  # blockcnt*blockcnt维矩阵
 
     iters = 100
     a = 0.8
     for i in range(0, iters):
         oldpai = copy.deepcopy(pai)
-        pai = a*oldpai*p0 + (1-a)*unipai #pageRank
-        #pai几乎不变，则停止迭代
+        pai = a * oldpai * p0 + (1 - a) * unipai  # pageRank
+        # pai几乎不变，则停止迭代
         stop = True
         for j in range(0, blockcnt):
-            if fabs(oldpai[0,j]-pai[0,j]) > 1e-10:
+            if fabs(oldpai[0, j] - pai[0, j]) > 1e-10:
                 stop = False
                 break
         if stop:
             break
 
-    tpai = [pai[0,j] for j in range(0, blockcnt)]
-    #mmr
+    tpai = [pai[0, j] for j in range(0, blockcnt)]
+    # mmr
     score = []
     index = []
     lambd = 0.7
@@ -166,8 +161,8 @@ def blockscore(blockDir, news, label, labelv):
             if j not in index:
                 max_simi = 0.0
                 for k in index:
-                    max_simi = max(max_simi, p0[j,k])
-                mmr = (1-lambd)*tpai[j] - lambd*max_simi
+                    max_simi = max(max_simi, p0[j, k])
+                mmr = (1 - lambd) * tpai[j] - lambd * max_simi
                 if mmr > maxmmr:
                     maxmmr = mmr
                     maxj = j
@@ -176,6 +171,7 @@ def blockscore(blockDir, news, label, labelv):
         index.append(maxj)
 
     return blocks, score, index
+
 
 blockDir = '../Sentence/assign/little_block/'
 labelDir = '../Sentence/label/'
@@ -187,13 +183,13 @@ news_name = ['hpv疫苗', 'iPhone X', '乌镇互联网大会', '九寨沟7.0级�
              '萨德系统 中韩', '雄安新区', '榆林产妇坠楼']
 for news in news_name:
     print news
-    f = open(unicode(labelDir+news+'/label.txt', 'utf8'), 'r')
+    f = open(unicode(labelDir + news + '/label.txt', 'utf8'), 'r')
     labels = [line.strip().replace('+', '') for line in f]
     f.close()
 
-    #计算每个标签的word2vec向量
+    # 计算每个标签的word2vec向量
     labelv = []
-    f = open(unicode(labelDir+news+'/label.txt', 'utf8'), 'r')
+    f = open(unicode(labelDir + news + '/label.txt', 'utf8'), 'r')
     for line in f:
         lable = line.strip().split('+')
         word_vec_list = []
@@ -207,16 +203,17 @@ for news in news_name:
         print label
         blocks, bscore, index = blockscore(blockDir, news, label, labelv[labelid])
 
-        path = outDir+news
+        path = outDir + news
         if not os.path.exists(unicode(path, 'utf8')):
             os.mkdir(unicode(path, 'utf8'))
 
-        f = open(unicode(path+'/'+label+'.txt', 'utf8'), 'w')
+        f = open(unicode(path + '/' + label + '.txt', 'utf8'), 'w')
         blockcnt = len(blocks)
         for i in range(0, blockcnt):
             curi = index[i]
-            f.write(str(len(blocks[curi]))+'\n')
+            f.write(str(len(blocks[curi])) + '\n')
             for sent in blocks[curi]:
-                f.write(str(sent.newsid)+' '+str(sent.globalid)+' '+str(sent.paraid)+' '+str(sent.localid)+' '+str(sent.sentnum)+'\n')
-                f.write(sent.content+'\n')
+                f.write(str(sent.newsid) + ' ' + str(sent.globalid) + ' ' + str(sent.paraid) + ' ' + str(
+                    sent.localid) + ' ' + str(sent.sentnum) + '\n')
+                f.write(sent.content + '\n')
         f.close()

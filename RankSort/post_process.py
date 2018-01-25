@@ -8,7 +8,7 @@ from pyltp import Segmentor
 import re
 from math import sqrt
 
-qin = 1  # 改成0是刘辉的路径，否则是秦文涛的路径
+qin = 0  # 改成0是刘辉的路径，否则是秦文涛的路径
 segmentor = Segmentor()
 if qin == 1:
     segmentor.load('D:/coding/Python2.7/ltp_data_v3.4.0/cws.model')
@@ -28,8 +28,9 @@ f.close()
 label_dir = '../Sentence/label/'
 sum_dir = './topic_sum/'
 out_dir = './sum/'
-label_num = 4           # 选取前几个标签构成综述
-sim_threshold = 0.98    # 相似度大于此值的块不再被选入
+label_num = 4  # 选取前几个标签构成综述
+sim_threshold = 0.97  # 相似度大于此值的块不再被选入
+least = 200  # 标签下的最小长度
 
 news_name = ['hpv疫苗', 'iPhone X', '乌镇互联网大会', '九寨沟7.0级地震', '俄罗斯世界杯',
              '双十一购物节', '德国大选', '功守道', '战狼2', '权力的游戏', '李晨求婚范冰冰', '江歌刘鑫',
@@ -49,7 +50,7 @@ def process(blk):
         match_str = matched.group()
         idx = blk.index(match_str) + len(match_str)
         blk = blk[idx:]
-    pattern = r'[\w]日(电|讯)'.decode('utf-8')
+    pattern = r'([\w]日(电|讯)|新浪.{2}讯)'.decode('utf-8')
     matched = re.search(pattern, blk)
     if matched:
         match_str = matched.group()
@@ -119,31 +120,36 @@ def check_repeat(blocks, blk):
 def main():
     for news in news_name:
         labels = []
-        f_label = open(unicode(label_dir + news + '/label.txt','utf8'), 'r')
+        f_label = open(unicode(label_dir + news + '/label.txt', 'utf8'), 'r')
         for label in f_label:
             label = label.strip().replace('+', '')
             labels.append(label)
-            if len(labels) == label_num:
-                break
         f_label.close()
 
         f_sum = open(unicode(out_dir + news + '.txt', 'utf8'), 'w')
-
-        blocks = []     # 记录已经选择的块
+        label_cnt = 0
         for label in labels:
             f_label_sum = open(unicode(sum_dir + news + '/' + label + '.txt', 'utf8'), 'r')
-            f_sum.write('【' + label + '】\n')    # 相当于小标题，可以去掉
+            blocks = []
             for blk in f_label_sum:
                 blk = process(blk)
                 if check_repeat(blocks, blk):
                     blocks.append(blk)
-                    f_sum.write(blk)
-            f_sum.write('\n')
             f_label_sum.close()
+            cur_len = 0
+            for blk in blocks:
+                cur_len += len(blk.decode('utf-8'))
+            if cur_len >= least:
+                f_sum.write('【' + label + '】\n')
+                for blk in blocks:
+                    f_sum.write(blk)
+                f_sum.write('\n')
+                label_cnt += 1
+            if label_cnt == label_num:
+                break
 
         f_sum.close()
 
 
 if __name__ == '__main__':
     main()
-
