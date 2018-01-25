@@ -182,20 +182,21 @@ for news in news_name:
             for sent in block:
                 s += len(sent.content)/3.0
             blocklen.append(s)
-        #选择blocks中的若干块，使得其字数在于530~580之间，如果找不到，则放松范围
+        #选择blocks中的若干块，使得其字数在于minnum~maxnum之间，如果找不到，则放松范围
+        minnum, midnum, maxnum = 200, 250, 300
         tol, endblock = 0, 0
-        while tol < 550 and endblock < blockcnt:
+        while tol < midnum and endblock < blockcnt:
             ttol = tol + blocklen[endblock]
-            if ttol < 530:
+            if ttol < minnum:
                 tol = ttol
                 endblock += 1
-            elif ttol >= 530 and ttol <= 580:
+            elif ttol >= minnum and ttol <= maxnum:
                 tol = ttol
                 endblock += 1
                 break
-            elif ttol > 580:
+            elif ttol > maxnum:
                 #说明之前的字数少于530，加了这一个就超了580
-                l, r = 530 - tol, 580 - tol
+                l, r = minnum - tol, maxnum - tol
                 nice = -1
                 for i in range(endblock+1, blockcnt):
                     if blocklen[i] >= l and blocklen[i] <= r:

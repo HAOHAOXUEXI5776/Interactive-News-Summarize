@@ -61,13 +61,20 @@ def cos_similarity(vec1, vec2):
     return result
 
 
-#计算两个块之间的相似度：取块间句子的最大相似度
+#计算两个块之间的相似度：取块间句子的平均相似度
 def block_simi(block1, block2):
-    max_simi = 0.0
-    for sent1 in block1:
-        for sent2 in block2:
-            max_simi = max(max_simi, cos_similarity(sent1.vec, sent2.vec))
-    return max_simi
+    vec1, vec2 = [], []
+    for sent in block1:
+        vec1.append(sent.vec)
+    for sent in block2:
+        vec2.append(sent.vec)
+    return cos_similarity(mean_vec(vec1), mean_vec(vec2))
+    #最大相似度
+    # max_simi = 0.0
+    # for sent1 in block1:
+    #     for sent2 in block2:
+    #         max_simi = max(max_simi, cos_similarity(sent1.vec, sent2.vec))
+    # return max_simi
 
 
 #返回news下label对应的块，以及它们的mmr得分

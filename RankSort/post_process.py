@@ -28,7 +28,7 @@ f.close()
 label_dir = '../Sentence/label/'
 sum_dir = './topic_sum/'
 out_dir = './sum/'
-label_num = 5           # 选取前几个标签构成综述
+label_num = 4           # 选取前几个标签构成综述
 sim_threshold = 0.98    # 相似度大于此值的块不再被选入
 
 news_name = ['hpv疫苗', 'iPhone X', '乌镇互联网大会', '九寨沟7.0级地震', '俄罗斯世界杯',
