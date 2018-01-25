@@ -25,7 +25,7 @@ def process(blk):
         match_str = matched.group()
         idx = blk.index(match_str) + len(match_str)
         blk = blk[idx:]
-    pattern = r'[\w]日(电|讯)'.decode('utf-8')
+    pattern = r'([\w]日(电|讯)|新浪.{2}讯)'.decode('utf-8')
     matched = re.search(pattern, blk)
     if matched:
         match_str = matched.group()
