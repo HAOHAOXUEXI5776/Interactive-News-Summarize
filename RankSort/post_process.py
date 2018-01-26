@@ -36,12 +36,15 @@ news_name = ['hpv疫苗', 'iPhone X', '乌镇互联网大会', '九寨沟7.0级�
              '双十一购物节', '德国大选', '功守道', '战狼2', '权力的游戏', '李晨求婚范冰冰', '江歌刘鑫',
              '王宝强马蓉离婚案', '百度无人驾驶汽车', '红黄蓝幼儿园', '绝地求生 吃鸡', '英国脱欧',
              '萨德系统 中韩', '雄安新区', '榆林产妇坠楼']
+conjunction = ['其中', '相比之下', '同时', '此外', '所以', '另外', '而', '导语']
+punc = ['，', '。', '：', '？','！']
+
 """
 news_name = ['九寨沟7.0级地震']
 """
 
 
-# 将块开头的报道信息删去
+# 将块开头的报道信息删去，将一开始的连词删去
 def process(blk):
     blk = blk.decode('utf-8')
     pattern = r'[^腾通](电|讯)(（[^（）]*）|\([^\(\)]*\))'.decode('utf-8')
@@ -64,6 +67,14 @@ def process(blk):
         if idx < 1:
             idx = idx + len(match_str)
             blk = blk[idx:]
+    for conj in conjunction:
+        if blk.find(conj.decode('utf-8')) == 0:
+            blk = blk[len(conj.decode('utf-8')):]
+            for pc in punc:
+                if blk.find(pc.decode('utf-8')) == 0:
+                    blk = blk[len(pc.decode('utf-8')):]
+                    break
+            break
     return blk.encode('utf-8')
 
 
@@ -110,9 +121,6 @@ def check_repeat(blocks, blk):
                 block_vec_list.append(model[wd])
         block_vec = mean_vec(block_vec_list)
         if cos_similarity(blk_vec, block_vec) > sim_threshold:
-            print 'sim\n'
-            print blk
-            print block
             return False
     return True
 
