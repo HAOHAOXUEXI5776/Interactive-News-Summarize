@@ -1,15 +1,14 @@
 # coding:utf-8
-import os
 
 newsName = ['德国大选', '俄罗斯世界杯', '功守道', '九寨沟7.0级地震', '权力的游戏',
             '双十一购物节', '乌镇互联网大会', '战狼2', 'hpv疫苗', 'iPhone X',
-            '李晨求婚范冰冰', '江歌刘鑫','王宝强马蓉离婚案', '百度无人驾驶汽车', '红黄蓝幼儿园',
-            '绝地求生 吃鸡', '英国脱欧','萨德系统 中韩', '雄安新区', '榆林产妇坠楼']
+            '李晨求婚范冰冰', '江歌刘鑫', '王宝强马蓉离婚案', '百度无人驾驶汽车', '红黄蓝幼儿园',
+            '绝地求生 吃鸡', '英国脱欧', '萨德系统 中韩', '雄安新区', '榆林产妇坠楼']
 
 rootdir = '../Ngrams/feature_12cut/'
 Sum = 0
 print "liu's label"
-for n in range(0,10):
+for n in range(0, 10):
     cnt1 = 0
     cnt2 = 0
     cnt3 = 0
@@ -28,11 +27,11 @@ for n in range(0,10):
             cnt3 += 1
         all += 1
     ratio = float(cnt1 + cnt2 + cnt3) / all
-    print all,cnt1 + cnt2 + cnt3,ratio
+    print all, cnt1 + cnt2 + cnt3, ratio
     Sum += all
 print
 print "qin's label"
-for n in range(11,20):
+for n in range(11, 20):
     cnt1 = 0
     cnt2 = 0
     cnt3 = 0

@@ -1,7 +1,8 @@
 # coding:utf-8
 
-# 使用TextRank算法从候选标签中选取关键词。原算法只针对unigram，倾向于选择出现频次高的词作为关键词，所以如果把bi-gram,
-# 3-gram和uni-gram等同处理，则会因为出现频次低而被unigram比下去，所以选择如下方式：
+# 使用TextRank算法从候选标签中选取label。
+# 原算法只针对unigram，倾向于选择出现频次高的词作为关键词，所以如果把bi-gram,3-gram和uni-gram等同处理，则会因为出现频次低而被
+# unigram比下去，所以选择如下方式：
 # 先计算单个词的投票（包括unigram以及bi-gram，3-gram中出现的单个词），对于bi-gram和3-gram，再把两个顶点合并，得到最终的图。
 
 from numpy import *  # 用于矩阵运算
