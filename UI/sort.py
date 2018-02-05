@@ -128,7 +128,9 @@ def getTopicSum(news, label, std, model, stoplist, segmentor):
                 blocks[nice], blocks[end_block] = blocks[end_block], blocks[nice]
                 end_block += 1
                 break
-    assert end_block != 0
+    # assert end_block != 0
+    if end_block == 0:
+        return
     # 按照标题的相似度将第0~endblock-1块分为几类
     print 'tol=', tol
     cluster = []
