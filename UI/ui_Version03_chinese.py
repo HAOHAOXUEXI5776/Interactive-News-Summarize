@@ -279,7 +279,8 @@ class MyWin(wx.Frame):
         self.allidx = []
         text1 = wx.StaticText(self.topicpanel, label = '子话题')
         for i, topic in enumerate(self.topicList):
-            tmp = MyDragCheckBox(self.topicpanel, label = topic)
+            # tmp = MyDragCheckBox(self.topicpanel, label = topic)
+            tmp = wx.CheckBox(self.topicpanel, label = topic)
             tmp.SetForegroundColour(self.color[i])
             tmp.Hide()
             self.topiccheck.append(tmp)
@@ -292,7 +293,7 @@ class MyWin(wx.Frame):
         self.wordspin = []
         text2 = wx.StaticText(self.topicpanel,label = '字数')
         for i, num in enumerate(self.topicword):
-            tmp = wx.SpinCtrl(self.topicpanel, value = '0', size = (60, 17), min = 50, max = 800)
+            tmp = wx.SpinCtrl(self.topicpanel, value = '0', size = (60, 17), min = 50, max = 1000)
             tmp.SetForegroundColour(self.color[i])
             tmp.Hide()
             self.wordspin.append(tmp)
@@ -478,8 +479,7 @@ class MyWin(wx.Frame):
             self.box32.Layout()
             return
         if self.lasttopic != -1 and self.topiccheck[self.lasttopic].GetValue() == True:
-            self.box32.Layout()
-            return
+            showi = self.lasttopic
         #现在的场景：有颜色按钮，需要填充“选择块”区域，使用第showi的标签对应的块
         self.bsall.Show(); self.bsinv.Show()
         # self.graybtn.Show(); self.jumptext.Show()
@@ -499,7 +499,7 @@ class MyWin(wx.Frame):
         self.box32.Layout()
 
         self.lasttopic = showi
-        self.AddStat(('子话题： %s 有 %d 个文本块.')%(self.topics[showi].label, self.k))
+        self.AddStat(('子话题：%s有%d个文本块.')%(self.topics[showi].label, self.k))
 
 
 
@@ -540,7 +540,7 @@ class MyWin(wx.Frame):
         self.notebook.SetSelection(0) #跳到News页
         self.newstree.SelectItem(self.newsid[newsidx])
 
-        self.AddStat(('从子话题：%s的文本块 %d 跳转到到了新闻%d')%(blockidx, self.topics[topicidx].label, newsidx))
+        self.AddStat(('从子话题：%s的文本块 %d 跳转到到了新闻%d')%(self.topics[topicidx].label, blockidx, newsidx))
 
 
 
@@ -612,8 +612,8 @@ class MyWin(wx.Frame):
         #为了能拖动多选框要做的初始化工作
         self.n = min(len(self.topicList), self.maxtopic)
         self.allidx = [i for i in range(0, self.n)]
-        for i in range(0, self.n):
-            self.topiccheck[i].Set(i, self.n, self.topiccheck, self.allidx, self.wordspin, self)
+        # for i in range(0, self.n):
+        #     self.topiccheck[i].Set(i, self.n, self.topiccheck, self.allidx, self.wordspin, self)
         self.AddStat(('共有%d个子话题.')%(len(self.topicList)))
 
         #得到每个标签的块
@@ -665,7 +665,7 @@ class MyWin(wx.Frame):
                 curlabel = curlabel.strip() #去掉末尾的空格
                 selectTopic.append(curlabel)
                 selectTopicid.append(truei)
-                self.AddStat(curlabel+'被选择')
+                self.AddStat('“'+curlabel+'”被选择')
                 selectColor.append(self.color[truei])
 
         selecnt = len(selectTopic)
@@ -707,11 +707,11 @@ class MyWin(wx.Frame):
 
             #2.运行sort.py中的getTopicSum，得到每个标签的综述
             std = self.wordspin[tid].GetValue()
-            if wordcnt < std - 40:
-                #字数不够啊，报错
-                self.AddStat(('生成%s的综述时发生错误')%(curtopic.label))
-                notuse[i] = 1
-                continue
+            # if wordcnt < std - 40:
+            #     #字数不够啊，报错
+            #     self.AddStat(('生成%s的综述时发生错误')%(curtopic.label))
+            #     notuse[i] = 1
+            #     continue
             sort.getTopicSum(self.newsname, curtopic.label, std, model, stoplist, segmentor)
 
         tmpselectTopic, tmpselectColor = [], []

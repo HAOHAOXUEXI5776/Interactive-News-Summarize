@@ -53,18 +53,6 @@ def getTopicSum(news, label, std, model, stoplist, segmentor):
     if not os.path.exists(path):
         os.mkdir(path)
 
-    # 读入所有的标题,计算其向量置于title中
-    title = []
-    f = open('../Sentence/sentence/' + news + '/title.txt', 'r')
-    for line in f:
-        words = segmentor.segment(line.strip())
-        word_vec_list = []
-        for word in words:
-            if word not in stoplist and word in model:
-                word_vec_list.append(model[word])
-        title.append(mean_vec(word_vec_list))
-    f.close()
-
     print label
     # 读取排序后的块
     blocks = []  # 记录该标签对应的块
@@ -90,80 +78,36 @@ def getTopicSum(news, label, std, model, stoplist, segmentor):
         blocks.append(block)
     f.close()
     blockcnt = len(blocks)
-    blocklen = []
+    tollen = 0
     for block in blocks:
         s = 0
         for sent in block:
             s += len(sent.content) / 3.0
-        blocklen.append(s)
-    # 选择blocks中的若干块，使得其字数在于530~580之间，如果找不到，则放松范围
-    least = std - 40
-    most = std + 40
-    tol, end_block = 0, 0
-    while tol < std and end_block < blockcnt:
-        ttol = tol + blocklen[end_block]
-        if ttol < least:
-            tol = ttol
-            end_block += 1
-        elif least <= ttol <= most:
-            tol = ttol
-            end_block += 1
-            break
-        elif ttol > most:
-            # 说明之前的字数少于least，加了这一个就超了most
-            l, r = least - tol, most - tol
-            nice = -1
-            for i in range(end_block + 1, blockcnt):
-                if l <= blocklen[i] <= r:
-                    nice = i
-                    break
-            if nice == -1:
-                # 往后找不到满足的，则找下一个
-                tol += blocklen[end_block]
-                end_block += 1
-                break
-            else:
-                # 将第nice个作为下一个
-                tol += blocklen[nice]
-                blocks[nice], blocks[end_block] = blocks[end_block], blocks[nice]
-                end_block += 1
-                break
-    # assert end_block != 0
-    if end_block == 0:
-        return
-    # 按照标题的相似度将第0~endblock-1块分为几类
-    print 'tol=', tol
-    cluster = []
-    use = [0 for i in range(0, end_block)]
-    for i in range(0, end_block):
-        if use[i] == 1:
-            continue
-        newid_i = blocks[i][0].newsid - 1
-        tcluster = [blocks[i]]
-        use[i] = 1
-        for j in range(i + 1, end_block):
-            newid_j = blocks[j][0].newsid - 1
-            if use[j] == 0 and cos_similarity(title[newid_i], title[newid_j]) > 0.6:
-                tcluster.append(blocks[j])
-                use[j] = 1
-        cluster.append(tcluster)
-    f = open(outDir + news + '/' + label + '.txt', 'w')
-    # 每个类进行排序
-    for tcluster in cluster:
-        l = len(tcluster)
-        sort = [i for i in range(0, l)]
-        # 块在全文越靠前的位置，在段越靠前的位置，越要排到前头
-        # 若位置因素影响不大，则考虑时间因素，新闻标号越小，发生的时间越晚，越往后排
-        for i in range(0, l):
-            for j in range(i + 1, l):
-                senti, sentj = tcluster[sort[i]][0], tcluster[sort[j]][0]
-                if senti.globalid > sentj.globalid or \
-                    (senti.globalid == sentj.globalid and senti.localid > sentj.localid) or \
-                    (senti.globalid == sentj.globalid and senti.localid == sentj.localid and senti.newsid < sentj.newsid):
-                    sort[i], sort[j] = sort[j], sort[i]
-        for i in range(0, l):
-            for sent in tcluster[sort[i]]:
+        tollen += s
+
+    if tollen < std:
+        #把块全部输出
+        f = open(outDir + news + '/' + label + '.txt', 'w')
+        for block in blocks:
+            for sent in block:
                 f.write(sent.content)
             f.write('\n')
-    f.close()
-
+        f.close()
+    else:
+        #最naive的方式
+        curtol = 0
+        f = open(outDir + news + '/' + label + '.txt', 'w')
+        for block in blocks:
+            for sent in block:
+                tmpsent = sent.content.split('。')
+                for tmp in tmpsent:
+                    if tmp == '':
+                        continue
+                    curtol += len(tmp+'。')/3
+                    f.write(tmp+'。')
+                    if curtol > std:
+                        break
+            f.write('\n')
+            if curtol > std:
+                break
+        f.close()

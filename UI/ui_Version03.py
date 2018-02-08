@@ -164,13 +164,13 @@ class MyWin(wx.Frame):
         #（这些个人为规定的“最多”是为了编程方便以及性能）
         self.lasttopic = -1 #为topic的块进行修改后，跳转到下一个topic时要保存
                             #对上一个topic的修改
-        self.history = [u'英国脱欧', u'hpv疫苗', u'功守道'] #搜索的新闻历史
+        self.history = [u'俄罗斯世界杯', u'英国脱欧', u'hpv疫苗', u'功守道'] #搜索的新闻历史
         self.blank = '很长的不可见时的标题'
 
         self.prefd = wx.FontData()#记录上一次选择的字体
         #颜色用于标签-综述的关系
-        self.color = ['#FF0000', '#02B232', '#0000FF', '#008000', '#FF00FF',
-                      '#208080', '#400000', '#800000', '#000040', '#000080',
+        self.color = ['#FF0000', '#02B232', '#000040', '#008000', '#FF00FF',
+                      '#208080', '#400000', '#800000', '#0000FF', '#00FF00',
                       '#400040', '#800080', '#408000', '#804000', '#00FFFF',
                       '#24ADA3', '#AC0987', '#745BAD', '#87813A', '#134599']
         self.panel = wx.Panel(self)
@@ -179,7 +179,7 @@ class MyWin(wx.Frame):
         self.NewsTag()
         self.TopicTag()
         self.notebook.InsertPage(0, self.topicpanel, text = 'Subtopics and Text Blocks')
-        self.notebook.InsertPage(0, self.newspanel, text = 'News File')
+        self.notebook.InsertPage(0, self.newspanel, text = 'News Files')
         self.notebook.SetSelection(0) #跳到News页
         self.WorkStation()
         self.SetLocation()
@@ -380,7 +380,7 @@ class MyWin(wx.Frame):
         tmpbox.AddGrowableCol(1, 8)
         for i in range(0, self.maxblockcnt):
             tmpcheck = wx.CheckBox(self.blockpanel, -1)
-            tmpbtn = wx.Button(self.blockpanel, 200+i, label = 'Original news', style = wx.BU_EXACTFIT)
+            tmpbtn = wx.Button(self.blockpanel, 200+i, label = 'Original News', style = wx.BU_EXACTFIT)
             tmpbtn.Bind(wx.EVT_BUTTON, self.Jump2News)
             ttbox = wx.BoxSizer(wx.VERTICAL)
             ttbox.Add(tmpcheck, 0, wx.ALIGN_LEFT)
@@ -398,7 +398,7 @@ class MyWin(wx.Frame):
         self.blockpanel.SetSizer(tmpbox)
 
         #将按钮和CheckListCtrl放入一个垂直的box内
-        staticbox2 = wx.StaticBox(self.topicpanel, -1, 'Set text blocks')
+        staticbox2 = wx.StaticBox(self.topicpanel, -1, 'Set Text Blocks')
         self.box32 = wx.StaticBoxSizer(staticbox2, wx.VERTICAL)
         self.box32.Add(self.bbtnpanel, 0, wx.ALL|wx.EXPAND, border = 1)
         self.box32.Add(self.btnpanel, 0, wx.ALL|wx.EXPAND, border = 1)
@@ -478,8 +478,7 @@ class MyWin(wx.Frame):
             self.box32.Layout()
             return
         if self.lasttopic != -1 and self.topiccheck[self.lasttopic].GetValue() == True:
-            self.box32.Layout()
-            return
+            showi = self.lasttopic
         #现在的场景：有颜色按钮，需要填充“选择块”区域，使用第showi的标签对应的块
         self.bsall.Show(); self.bsinv.Show()
         # self.graybtn.Show(); self.jumptext.Show()
@@ -614,7 +613,7 @@ class MyWin(wx.Frame):
         self.allidx = [i for i in range(0, self.n)]
         for i in range(0, self.n):
             self.topiccheck[i].Set(i, self.n, self.topiccheck, self.allidx, self.wordspin, self)
-        self.AddStat(('%d topics totally.')%(len(self.topicList)))
+        self.AddStat(('%d subtopics totally.')%(len(self.topicList)))
 
         #得到每个标签的块
         self.topics = []
@@ -692,8 +691,9 @@ class MyWin(wx.Frame):
             wordcnt = 0
             f = open('blockscoretmp/'+self.newsname+'/'+curtopic.label+'.txt', 'w')
             f.write('')
+            k = min(curtopic.blocks, self.maxblockcnt)
             for j, block in enumerate(curtopic.blocks):
-                if j >= self.k:
+                if j >= k:
                     break
                 if curtopic.blockchecks[j] == True:
                     #将它输入到f里
